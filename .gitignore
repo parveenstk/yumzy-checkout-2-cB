@@ -1,0 +1,62 @@
+# Node modules
+node_modules/
+
+# Nuxt build output
+.nuxt/
+.output/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+log/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local runtime config (optional if using local overrides)
+*.local.*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor folders
+.vscode/
+.idea/
+
+# Optional: OS or system-specific
+*.swp
+*.swo
+
+# Optional: Test coverage
+coverage/
+
+# Optional: Lock files if you're using only one manager
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Nuxt generate output (static build)
+dist/
+
+# Encryption keys or temp files (if used)
+server/utils/keys/
+*.key
+*.pem
+
+# Vercel / Netlify deployment folders
+.vercel/
+.netlify/
+
+# Optional: Server logs
+server.log
+*.log
+
+# Nuxt dev cache
+.cache/
+
+.vercel
