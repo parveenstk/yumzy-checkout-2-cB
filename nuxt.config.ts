@@ -2,7 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   app: {
-    baseURL: "/checkout-2-c",
+    baseURL: "/checkout-2-cB",
     head: {
       htmlAttrs: {
         lang: 'en'
