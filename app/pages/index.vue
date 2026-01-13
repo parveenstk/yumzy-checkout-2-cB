@@ -2,9 +2,9 @@
 import { cardExpiryMonths, getCardExpiryYears, gummyBagsSelector, gymmyTypeData, slides } from '~/assets/data/checkout';
 import GiftItemsSkeleton from '~/components/skeleton/GiftItemsSkeleton.vue';
 import { checkSteps } from '~/composables/checkSteps';
-import { fbCAPI } from '~/composables/common';
+import { fbCAPI, fbCAPIAPI } from '~/composables/common';
 import { useOrderDataLayer } from '~/composables/useGtm.client';
-import { importClick, queryCampaign } from '~/composables/useKonnectiveApi';
+import { confirmPaypal, importClick, queryCampaign } from '~/composables/useKonnectiveApi';
 import { Faq, Footer, GiftItems, Header, Reviews, Tabs } from '~/utils';
 import { useCheckoutStore, useFormStore } from '../../stores/index';
 
