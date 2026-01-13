@@ -34,18 +34,16 @@ export const useFormStore = defineStore('formStore', () => {
     const formFields: Reactive<FormFields> = reactive({
 
         // Basic fields
-        firstName: '',
-        lastName: '',
+        shipFirstName: '',
+        shipLastName: '',
         email: '',
         phoneNumber: '',
 
         // Shipping fields
-        shipFirstName: '',
-        shipLastName: '',
         shipStreetAddress: '',
         shipApptsAddress: '',
         shipCity: '',
-        shipCounty: '',
+        shipCounty: 'US',
         shipState: '',
         shipPostalCode: '',
 
@@ -70,7 +68,7 @@ export const useFormStore = defineStore('formStore', () => {
     })
 
     // payPal fields
-    const payPalFields: (keyof FormFields)[] = ['firstName', 'lastName', 'email', 'phoneNumber'];
+    const payPalFields: (keyof FormFields)[] = ['shipFirstName', 'shipLastName', 'email', 'phoneNumber'];
 
     // Watch form fields for changes and clear hasEmptyFields flag if all required fields are filled
     watch(formFields, () => {
@@ -81,8 +79,10 @@ export const useFormStore = defineStore('formStore', () => {
         const anyEmpty = fieldsToCheck.some(field => {
             return !formFields[field] || formFields[field].toString().trim() === '';
         });
+        // console.log("anyEmpty:", anyEmpty);
 
         hasEmptyFields.value = anyEmpty;
+        // console.log("hasEmptyFields updated to:", hasEmptyFields.value);
     }, { deep: true });
 
     // Zod schema
@@ -95,16 +95,16 @@ export const useFormStore = defineStore('formStore', () => {
 
     // Basic schema (always required for both payment methods)
     const basicSchema = z.object({
-        firstName: z.string()
-            .nonempty('This field is required')
-            .min(2, 'First name must be at least 2 characters')
-            .max(15, 'First name must be at most 15 characters')
-            .regex(nameRegex, 'First name must contain only letters'),
-        lastName: z.string()
+        shipFirstName: z.string()
             .nonempty('This field is required.')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
-            .regex(nameRegex, 'Last name contains only letters'),
+            .regex(nameRegex, 'Shipping first name contains only letters'),
+        shipLastName: z.string()
+            .nonempty('This field is required.')
+            .min(2, 'Shipping first name must be at least 2 characters')
+            .max(15, 'Shipping first name must be at most 15 characters')
+            .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
         phoneNumber: z.string()
@@ -115,17 +115,18 @@ export const useFormStore = defineStore('formStore', () => {
     });
 
     const schema = z.object({
+
         // Basic
-        firstName: z.string()
-            .nonempty('This field is required')
-            .min(2, 'First name must be at least 2 characters')
-            .max(15, 'First name must be at most 15 characters')
-            .regex(nameRegex, 'First name must contain only letters'),
-        lastName: z.string()
+        shipFirstName: z.string()
             .nonempty('This field is required.')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
-            .regex(nameRegex, 'Last name contains only letters'),
+            .regex(nameRegex, 'Shipping first name contains only letters'),
+        shipLastName: z.string()
+            .nonempty('This field is required.')
+            .min(2, 'Shipping first name must be at least 2 characters')
+            .max(15, 'Shipping first name must be at most 15 characters')
+            .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
         phoneNumber: z.string()
@@ -135,17 +136,6 @@ export const useFormStore = defineStore('formStore', () => {
             .regex(phoneRegex, 'Phone contains only numbers'),
 
         // Shipping Address
-        shipFirstName: z.string()
-            .nonempty('This field is required.')
-            .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
-            .regex(nameRegex, 'Shipping first name contains only letters'),
-
-        shipLastName: z.string()
-            .nonempty('This field is required.')
-            .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
-            .regex(nameRegex, 'Shipping last name contains only letters'),
         shipStreetAddress: z.string()
             .nonempty('This field is required.')
             .min(5, 'Street address must be at least 5 characters')
@@ -212,12 +202,10 @@ export const useFormStore = defineStore('formStore', () => {
 
     // error Define
     const errors = reactive<Record<string, string>>({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
         shipFirstName: '',
         shipLastName: '',
+        email: '',
+        phoneNumber: '',
         shipStreetAddress: '',
         shipApptsAddress: '',
         shipCity: '',
@@ -240,7 +228,7 @@ export const useFormStore = defineStore('formStore', () => {
 
     // Required Feilds
     const requiredFields: (keyof FormFields)[] = [
-        'firstName', 'email', 'phoneNumber', 'shipFirstName', 'shipLastName', 'shipStreetAddress', 'shipCity', 'shipCounty', 'shipState', 'shipPostalCode', 'creditCardNumber', 'cardCVV', 'expiryMonth', 'expiryYear'
+        'shipFirstName', 'shipLastName', 'email', 'phoneNumber', 'shipStreetAddress', 'shipCity', 'shipCounty', 'shipState', 'shipPostalCode', 'creditCardNumber', 'cardCVV', 'expiryMonth', 'expiryYear'
     ];
 
     const billingRequiredFields: (keyof FormFields)[] = [
@@ -249,16 +237,14 @@ export const useFormStore = defineStore('formStore', () => {
 
     const getRequiredFields = () => {
         const fields: (keyof FormFields)[] = [
-            'firstName',
-            'lastName',
+            'shipFirstName',
+            'shipLastName',
             'email',
             'phoneNumber'
         ];
 
         if (paymentMethod.value === 'creditCard') {
             fields.push(
-                'shipFirstName',
-                'shipLastName',
                 'shipStreetAddress',
                 'shipCity',
                 'shipCounty',
@@ -300,7 +286,6 @@ export const useFormStore = defineStore('formStore', () => {
         let hasEmpty = false;
 
         // Basic + Shipping + Payment
-        // const allRequired = [...requiredFields];
         const allRequired = getRequiredFields();
 
         // Add billing if using different billing address
@@ -373,6 +358,7 @@ export const useFormStore = defineStore('formStore', () => {
 
     // check validation on input
     const validateField = async <K extends keyof typeof formFields>(key: K, value: string) => {
+
         if (!activeSchema.value) {
             formFields[key] = value;
             return;
@@ -401,6 +387,7 @@ export const useFormStore = defineStore('formStore', () => {
 
     // bill details same
     const billSame = () => {
+
         // Extra Protection
         if (!sameBilling.value) return;
         const shipCounty = formFields.shipCounty;

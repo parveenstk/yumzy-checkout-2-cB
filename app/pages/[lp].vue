@@ -117,9 +117,9 @@ function startCountdown() {
 
 // Add data in Cart
 const addProductData = (id: number) => {
+    const sub = getFromStorage('sub', 'session'); // check subscription status
     selectedBag.value = id;
-    // console.log("selectedBag.value:", selectedBag.value);
-    const variantId = config[checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'][selectedBag.value - 1];
+    const variantId = sub ? config[`${checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'][selectedBag.value - 1];
     if (!variantId) return;
 
     checkoutStore.selectedQuantity = variantId;
@@ -147,13 +147,14 @@ const calculateComparePrice = () => {
 
 // Switch Gummy Type
 const switchGummyType = (type: string) => {
+    const sub = getFromStorage('sub', 'session'); // check subscription status
     checkoutStore.selectedGummyType = type;
     const bagQty = selectedBag.value;
     const activeBag = gummyBagsSelector.find(bag => bag.id === bagQty)!;
     if (!activeBag) return;
 
     // const variantId = activeBag.variant[type]?.id;
-    const variantId = config[type as 'ogBags' | 'sourBags'][selectedBag.value - 1];
+    const variantId = sub ? config[`${type as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[type as 'ogBags' | 'sourBags'][selectedBag.value - 1];
     if (!variantId) return;
 
     checkoutStore.selectedQuantity = variantId;
@@ -178,6 +179,7 @@ onMounted(async () => {
 
     // check stetps affter successfull order
     checkSteps()
+    await confirmPaypal();
 
     // Query Campaign
     await queryCampaign();
@@ -185,12 +187,15 @@ onMounted(async () => {
     // Getting all countries
     await countries();
 
+    // Set default country as US
+    formStore.handleCountry('US', 'ship')
+
     // Getting API
     await fetchIpInfo();
 
     // Initialize selected gummy and quanity on load
     checkoutStore.selectedGummyType = "ogBags";
-    checkoutStore.selectedQuantity = config.ogBags[2] || 6776; // 2 Bags of Original Gummies
+    checkoutStore.selectedQuantity = config.ogBagsSub[2] || 6791; // 3 Bags of Sub Gummies
     checkoutStore.addGummyProduct(); // add product in cart afterwards
 
     // Updating the screen size
@@ -210,13 +215,14 @@ onMounted(async () => {
     // Facebook CAPI & GTM DataLayer - InitiateCheckout event
     setTimeout(() => {
         fbCAPI("InitiateCheckout");
+        fbCAPIAPI("InitiateCheckout");
         useOrderDataLayer("InitiateCheckout");
     }, 1000);
 
 })
 
 watch(paymentMethod, (newValue) => {
-    // console.log('newValue:', newValue);
+    console.log('selected payment method:', newValue);
 });
 
 watch(checkoutStore.cartData, (newCartData) => {
@@ -304,12 +310,8 @@ watch(checkoutStore.cartData, (newCartData) => {
                 <NuxtImg src="/images/fire.svg" alt="Fire" class="w-8 h-8 sm:w-8 sm:h-8 mr-2 flex-shrink-0" />
 
                 <!-- Text -->
-                <p class="text-center text-lg extrablod">
-                    Yumzy is selling like hotcakes & inventory is very limited.
-                    But we've reserved your order for:
-                    <span class="text-red-600 font-bold lg:inline inline-block">
-                        {{ String(minutes).padStart(2, '0') }} MIN {{ String(seconds).padStart(2, '0') }} SEC
-                    </span>
+                <p class="text-center text-lg extrablod">Hurry. We currently have your order reserved. But Yumzy is
+                    selling like hotcakes, and we anticipate selling out soon.
                 </p>
             </div>
         </section>
@@ -478,30 +480,31 @@ watch(checkoutStore.cartData, (newCartData) => {
 
                             <div class="bg-white pt-4">
                                 <div class="space-y-4">
+
                                     <!-- First Name -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <input v-model="formFields.firstName" name="firstName" type="text"
-                                                @input="validateField('firstName', ($event.target as HTMLInputElement).value)"
+                                            <input v-model="formFields.shipFirstName" name="shipFirstName" type="text"
+                                                @input="validateField('shipFirstName', ($event.target as HTMLInputElement).value)"
                                                 placeholder="First Name" :class="[
                                                     'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.firstName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
+                                                    errors.shipFirstName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
                                                 ]" maxlength="16" />
-                                            <p v-if="errors.firstName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.firstName }}
+                                            <p v-if="errors.shipFirstName" class="ml-2 mt-1 text-sm text-[#e6193c]">
+                                                {{ errors.shipFirstName }}
                                             </p>
                                         </div>
 
                                         <!-- Last Name -->
                                         <div>
-                                            <input v-model="formFields.lastName" name="lastName" type="text"
-                                                @input="validateField('lastName', ($event.target as HTMLInputElement).value)"
+                                            <input v-model="formFields.shipLastName" name="shipLastName" type="text"
+                                                @input="validateField('shipLastName', ($event.target as HTMLInputElement).value)"
                                                 placeholder="Last Name" :class="[
                                                     'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.lastName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
+                                                    errors.shipLastName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
                                                 ]" maxlength="16" />
-                                            <p v-if="errors.lastName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.lastName }}
+                                            <p v-if="errors.shipLastName" class="ml-2 mt-1 text-sm text-[#e6193c]">
+                                                {{ errors.shipLastName }}
                                             </p>
                                         </div>
 
@@ -514,7 +517,7 @@ watch(checkoutStore.cartData, (newCartData) => {
                                         :class="[
                                             'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
                                             errors.email ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                        maxlength="51" />
+                                        maxlength="70" />
                                     <p v-if="errors.email" class="ml-2 mt-1 text-sm text-[#e6193c]">
                                         {{ errors.email }}
                                     </p>
@@ -550,37 +553,6 @@ watch(checkoutStore.cartData, (newCartData) => {
                             </h2>
 
                             <div class="space-y-4">
-                                <!-- Shipping - First Name -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                    <div>
-                                        <input v-model="formFields.shipFirstName" name="shipFirstName" type="text"
-                                            @input="validateField('shipFirstName', ($event.target as HTMLInputElement).value)"
-                                            placeholder="First Name"
-                                            :class="[
-                                                'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-
-                                                errors.shipFirstName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                            maxlength="16" />
-                                        <p v-if="errors.shipFirstName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                            {{ errors.shipFirstName }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Shipping - Last Name -->
-                                    <div>
-                                        <input v-model="formFields.shipLastName" name="shipLastName" type="text"
-                                            @input="validateField('shipLastName', ($event.target as HTMLInputElement).value)"
-                                            placeholder="Last Name"
-                                            :class="[
-                                                'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-
-                                                errors.shipLastName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                            maxlength="16" />
-                                        <p v-if="errors.shipLastName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                            {{ errors.shipLastName }}
-                                        </p>
-                                    </div>
-                                </div>
 
                                 <!-- Shipping - Street Address -->
                                 <input v-model="formFields.shipStreetAddress" name="shipStreetAddress" type="text"
@@ -1051,7 +1023,7 @@ watch(checkoutStore.cartData, (newCartData) => {
 
                                 <p v-if="formStore.hasEmptyFields && formStore.hasAttemptedSubmit"
                                     class="ml-2 mb-0 text-red-600 font-semibold text-center">
-                                    Please fill in the required fields above.
+                                    Please fill in the required fields above
                                 </p>
 
                                 <!-- Guarantee Section -->

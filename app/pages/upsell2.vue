@@ -21,6 +21,7 @@ onMounted(() => {
 
     if (checkPixel.from && checkPixel.from == 'importupsell') {
         UpsellsfbCAPI(checkPixel.datalayerobj);
+        // UpsellsfbCAPIAPI(checkPixel.datalayerobj);
         useUpsellsDataLayer(checkPixel.datalayerobj);
         window.history.replaceState({}, '', window.location.pathname + window.location.search)
     }

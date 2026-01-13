@@ -13,6 +13,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     const allProducts: Ref<StructuredProducts[]> = ref([]);
     const gummyProducts: Ref<StructuredProducts[]> = ref([]);
     const giftsProducts: Ref<StructuredProducts[]> = ref([]);
+    const subProducts: Ref<StructuredProducts[]> = ref([]);
     let cartData: Ref<StructuredProducts[]> = ref([]);
     let giftCartData: Ref<StructuredProducts[]> = ref([]);
     const selectedGummyType: Ref<string> = ref("ogBags");
@@ -52,12 +53,15 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
     const saveProducts = (
         products: StructuredProducts[],
         filteredGiftsProducts: StructuredProducts[],
+        filteredSubProducts: StructuredProducts[],
     ) => {
         allProducts.value = [...products];
         // console.log("allProducts.value:", allProducts.value);
 
         giftsProducts.value = [...filteredGiftsProducts];
         // console.log('giftsProducts.value:', giftsProducts.value);
+
+        subProducts.value = [...filteredSubProducts];
     };
 
     // Add Product in Cart
@@ -75,7 +79,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
         cartData.value[0] = { ...selectedProduct };
 
         // Set Shipping Based on the conditions
-        if (selectedQuantity.value === config.ogBags[0] || selectedQuantity.value === config.sourBags[0]) {
+        if (selectedQuantity.value === config.ogBags[0] || selectedQuantity.value === config.sourBags[0] || selectedQuantity.value === config.ogBagsSub[0] || selectedQuantity.value === config.sourBagsSub[0]) {
             formStore.formFields.shipProfile = config.shipProfiles[0]?.toString()!;
         } else if (activeTab.value === 'onetime') {
             formStore.formFields.shipProfile = config.shipProfiles[0]?.toString()!;
@@ -126,7 +130,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
             .reduce((total, item) => total + (Number(item.compareAtPrice) || 0), 0)
 
         // If NOT these productIds, add extraPrice
-        if (cartData.value[0]?.productId !== config.ogBags[1] && cartData.value[0]?.productId !== config.sourBags[1]) {
+        if (cartData.value[0]?.productId !== config.ogBags[0] && cartData.value[0]?.productId !== config.sourBags[0]) {
             totalValue += 500
         }
 
@@ -164,6 +168,7 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
             shipping = shipProfile[0]?.shipPrice || 0;
         }
 
+        saveToStorage('cartTotal', subtotal + Number(shipping), 'session')
         return (subtotal + Number(shipping));
     });
 

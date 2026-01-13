@@ -11,14 +11,14 @@ export interface ProductData {
 export interface FormFields {
 
     // Basic fields
-    firstName: string;
-    lastName: string;
+    // firstName: string;
+    // lastName: string;
+    shipFirstName: string;
+    shipLastName: string;
     email: string;
     phoneNumber: string;
 
     // Shipping fields
-    shipFirstName: string;
-    shipLastName: string;
     shipStreetAddress: string;
     shipApptsAddress: string;
     shipCity: string;

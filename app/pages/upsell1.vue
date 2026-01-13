@@ -33,6 +33,7 @@ onMounted(() => {
 
     if (checkPixel.from && checkPixel.from == 'importorder') {
         fbCAPI("Purchase");
+        fbCAPIAPI("Purchase");
         useOrderDataLayer("Purchase");
         window.history.replaceState({}, '', window.location.pathname + window.location.search)
     }
@@ -65,8 +66,7 @@ const isUpsellOpen = ref(false)
 
                     <h2
                         class="mt-2 lg:text-[calc(1.5vw-0px)] text-[calc(4vw-0px)] md:text-[calc(3vw-0px)] leading-[calc(.9em+1vw)] lg:leading-[calc(.5em+1vw)] text-black font-extrabold">
-                        Guarantees your
-                        family feels <br> amazing - faster! </h2>
+                        Guarantees your shipment <br> arrives in 2 days or less for only $9.99! </h2>
 
                     <!-- Video Content -->
                     <UpsellVideoContent desktopUrl="https://get.yumzy.com/video/upsell1/landscape-video.mp4"

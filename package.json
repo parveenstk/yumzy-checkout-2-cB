@@ -16,6 +16,7 @@
     "axios": "^1.12.1",
     "braintree-web": "^3.130.1",
     "card-validator": "^10.0.3",
+    "crypto-js": "^4.2.0",
     "nuxt": "^4.1.1",
     "pinia": "^3.0.3",
     "tailwindcss": "^4.1.13",
@@ -24,6 +25,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^24.3.3",
     "baseline-browser-mapping": "^2.9.11"
   }
