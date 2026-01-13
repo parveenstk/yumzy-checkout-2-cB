@@ -9,6 +9,7 @@ const config = env();
 // Update active tab and re-calculated cart subtotal based on subscription
 const updateActiveTab = (tab: string) => {
     checkoutStore.activeTab = tab;
+    saveToStorage("sub", tab === 'subscribe' ? true : false, 'session');
 
     const bagQty = checkoutStore.cartData[0]?.BagsQty;
     formStore.formFields.shipProfile = updatedShipProfile(tab, bagQty!, config.shipProfiles)
@@ -17,8 +18,10 @@ const updateActiveTab = (tab: string) => {
     // console.log("On Tab change:", formStore.formFields.shipProfile)
 };
 
-onMounted(() => {
-
+onMounted(async () => {
+    const subStatus = await getFromStorage('sub', 'session')
+    // console.log("subStatus", subStatus)
+    saveToStorage("sub", subStatus ?? true, 'session');
     // initialize activeTab
     checkoutStore.activeTab = 'subscribe';
 

@@ -7,7 +7,7 @@ const isVisible = computed(() => formStore.apiErrorAlert.status)
 const hideAlert = () => {
     console.log("hideAlert triggered")
     formStore.apiErrorAlert.status = false
-}; 
+};
 
 </script>
 

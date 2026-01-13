@@ -103,7 +103,7 @@ export const tabs = [
 ]
 
 export const termsAndCondition = (price: string) => [
-    `By clicking COMPLETE PURCHASE below, I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. I understand that I can easily cancel anytime by contacting the Yumzy Customer Success team. <strong><u>I understand that my order is protected by Yumzy's 200% Happiness Money Back Guarantee. </u> </strong>`,
+    `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
     "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
 ]
 

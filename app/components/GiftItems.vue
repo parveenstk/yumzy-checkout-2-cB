@@ -39,7 +39,7 @@ const props = defineProps({
 // Utility: check if an item is dimmed
 const isDimmed = (index) => {
     if (props.selectedBag === 1) return true;
-    if (props.selectedBag === 2) return index > 2;
+    // if (props.selectedBag === 2) return index > 2;
     return false;
 };
 
@@ -81,6 +81,7 @@ const visibleItems = computed(() => {
 
             <span class="flex items-center gap-1 font-bold">
                 <del v-if="index === 3" class="text-[#474747]">$500</del>
+                <del v-else-if="index === 0" class="text-[#474747]">${{ item.compareAtPrice }}+</del>
                 <del v-else class="text-[#474747]">${{ item.compareAtPrice }}</del>
                 <span>${{ item.productPrice }}</span>
             </span>

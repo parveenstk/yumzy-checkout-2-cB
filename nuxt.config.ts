@@ -32,6 +32,7 @@ export default defineNuxtConfig({
     public: {
       encryptResponses: true, // Optional public flag
       pixel_id: "2090427268412378",
+      access_token: "EAARsmWv5SHcBQc51itc624zpCVwke9jjtjmIfVeyKnVBOtaqyYOU2yCWsZBdVaINYHtSxWdQLuZAaZBrSOZBShpkaAy9JsZBXBryog2gbpIDMVlESQkXCLy7HZCFRKgvFYqJZAte2o8DAExm0S4382F36jJZBQlJhawf5BLgdvrVStZCqQDqsHnKY1YPpJQANDgQ7IQZDZD",
       GTM_id: "W7MPKBF2",
       checkout: {
         lp1: {
@@ -39,6 +40,7 @@ export default defineNuxtConfig({
           gummyId: 9225,
           WarrantyId: 9224,
           giftItems: [9226, 9227, 9228, 9229],
+          subBags: [9388, 9389, 9390, 9391],
           shipProfiles: [43, 44],
           offer1: 9326,
           offer1_1: 9338,
@@ -50,6 +52,7 @@ export default defineNuxtConfig({
           gummyId: 9253,
           WarrantyId: 9252,
           giftItems: [9254, 9255, 9256, 9257],
+          subBags: [9395, 9396, 9397, 9398],
           shipProfiles: [51, 52],
           offer1: 9330,
           offer1_1: 9342,
@@ -61,6 +64,7 @@ export default defineNuxtConfig({
           gummyId: 9281,
           WarrantyId: 9280,
           giftItems: [9282, 9283, 9284, 9285],
+          subBags: [9399, 9400, 9401, 9402],
           shipProfiles: [59, 60],
           offer1: 9334,
           offer1_1: 9346,
@@ -73,6 +77,7 @@ export default defineNuxtConfig({
           WarrantyId: 9196,
           giftItems: [9202, 9204, 9206, 9208],
           shipProfiles: [36, 38],
+          subBags: [9387, 9392, 9393, 9394],
           offer1: 9322,
           offer1_1: 9323,
           offer2: 9348,
@@ -85,15 +90,18 @@ export default defineNuxtConfig({
 
       // ogBags: [6750, 6752, 6754],
       ogBags: [6775, 6776, 6777, 6778],
+      ogBagsSub: [6787, 6789, 6791, 6793],
 
       // sourBags: [6762, 6764, 6766],
       sourBags: [6779, 6780, 6781, 6782],
+      sourBagsSub: [6788, 6790, 6792, 6794],
 
       // upsell2VariantIds: [6769, 6770, 6771],
       upsell2VariantIds: [6784, 6785, 6786],
 
       countries: ["US", "CA"],
       oneTimePrice: 64, // one time price $64
+      paypalBillerId: 79,
     }
   }
 })

@@ -11,11 +11,13 @@ const checkPixel = router.options.history.state;
 onMounted(() => {
     if (checkPixel.from && checkPixel.from == 'importupsell') {
         UpsellsfbCAPI(checkPixel.datalayerobj);
+        // UpsellsfbCAPIAPI(checkPixel.datalayerobj);
         useUpsellsDataLayer(checkPixel.datalayerobj);
-        fbCAPI("OrderTotals");
-        useOrderDataLayer('OrderTotals');
         window.history.replaceState({}, '', window.location.pathname + window.location.search);
     }
+    fbCAPI("OrderTotals");
+    fbCAPIAPI("OrderTotals");
+    useOrderDataLayer('OrderTotals');
     // to clear the storage
     setTimeout(() => {
         cleanStorage();

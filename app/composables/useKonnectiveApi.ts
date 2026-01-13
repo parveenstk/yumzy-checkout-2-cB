@@ -53,7 +53,7 @@ export const queryCampaign = async () => {
     const formStore = useFormStore();
     const checkoutStore = useCheckoutStore();
     const config = env();
-    const response = await request('/queryCampaign', { campaignId: config.campaignId, campaignProductId: `${config.gummyId}, ${config.WarrantyId}, ${config.giftItems.join(',')}` });
+    const response = await request('/queryCampaign', { campaignId: config.campaignId, campaignProductId: `${config.gummyId}, ${config.WarrantyId}, ${config.giftItems.join(',')}, ${config.subBags.join(',')}` });
 
     // show error if "response isn't available"
     if (!response) {
@@ -101,10 +101,10 @@ export const queryCampaign = async () => {
                     productImage: variant.imageUrl,
                     productPrice: variant.price,
                     ProductVariantName: variant.variantOptionName1,
-                    BagsQty: variant.variantOptionName2,
-                    compareAtPrice: compareAtPrice[variant.variantOptionName2]?.price,
-                    percentageOff: compareAtPrice[variant.variantOptionName2]?.discount,
-                    subscriptionName: compareAtPrice[variant.variantOptionName2]?.subscriptionName,
+                    BagsQty: variant.variantOptionName2 ?? product.productName.split(' - ')[1],
+                    compareAtPrice: compareAtPrice[variant.variantOptionName2 ?? product.productName.split(' - ')[1]]?.price,
+                    percentageOff: compareAtPrice[variant.variantOptionName2 ?? product.productName.split(' - ')[1]]?.discount,
+                    subscriptionName: compareAtPrice[variant.variantOptionName2 ?? product.productName.split(' - ')[1]]?.subscriptionName,
                 });
             });
         } else {
@@ -121,9 +121,11 @@ export const queryCampaign = async () => {
 
     // Gift Products
     const giftProducts = structuredProducts.filter(product => config.giftItems.includes(product.productId));
+    // Subscription Products
+    const subProducts = structuredProducts.filter(product => config.subBags.includes(product.productId));
 
     // Save both to the store (you'll need to update the store method)
-    checkoutStore.saveProducts(structuredProducts, giftProducts);
+    checkoutStore.saveProducts(structuredProducts, giftProducts, subProducts);
 };
 
 // Fetch Import Click 
@@ -155,7 +157,7 @@ export const importLead = async () => {
     console.log("importLead called");
     const checkoutStore = useCheckoutStore();
 
-    const payload = params();
+    const payload = await params();
     console.log("importLead → payload:", payload);
     if (!payload) return;
 
@@ -176,7 +178,7 @@ export const importOrder = async () => {
     const formStore = useFormStore();
     const checkoutStore = useCheckoutStore();
     const router = useRouter()
-    const payload = params('order');
+    const payload = await params('order');
     if (!payload) return;
     const response = await request('/importOrder', payload);
     console.log('importOrder response:', response);
@@ -214,15 +216,15 @@ export const importOrder = async () => {
     saveToStorage('savedOrderDetails', savedOrderDetails, 'session');
     console.log('savedOrder:', savedOrderDetails);
 
+    if (response.message.paypalUrl) {
+        window.location.href = response.message.paypalUrl;
+        return;
+    }
+
     saveToStorage('stepCompleted', 1, 'local')
     router.push({ path: '/upsell1', state: { from: 'importorder' } });
 
 };
-
-// Confirm Paypal
-// export const confirmPaypal = () => {
-
-// }
 
 // Upsell Import
 export const importUpsell = async ({ productId, productQty, productPrice, variantDetailId, pageTo, event }: { productId: string, productQty: number, productPrice: string, variantDetailId: string, pageTo: string, event: string }) => {
@@ -286,6 +288,79 @@ export const importUpsell = async ({ productId, productQty, productPrice, varian
         alert.message = response.message;
         checkoutStore.setTransactionStatus(false);
         router.push({ path: pageTo });
+    }
+}
+
+// Confirm PayPal --------> THIS IS WORKING
+export const confirmPaypal = async () => {
+    const router = useRouter();
+    const route = useRoute();
+    // const paypalAccept = route.query.paypalAccept; // Not in use for now
+    const token = route.query.token;
+    const ba_token = route.query.ba_token;
+    const payerID = route.query.PayerID;
+    if (!payerID && !ba_token) return;
+    // const checkoutStore = useCheckoutStore();
+    const config = env();
+    const sessionId = await getFromStorage('sessionId', "session");
+    const vipOptIn = await getFromStorage('sub', 'session'); // need to track this
+    const paypalBillerId = config.paypalBillerId;
+    const params: any = { sessionId, paypalBillerId };
+    params.campaignId = config.campaignId;
+    // Need to confogure shipping correctly
+    params.shipProfileId = config.shipProfiles[0];
+    if (vipOptIn) {
+        params.shipProfileId = config.shipProfiles[1];
+    }
+    params.token = token;
+    params.payerId = payerID;
+    params.baToken = ba_token;
+    params.custom1 = "Yumzy Store";
+    params.custom2 = "Checkout-2-c";
+    params.custom3 = "LP1-CH3";
+    params.custom5 = "API-Checkout";
+
+    const productReceipt: any = await getFromStorage('productReceipt', 'session');
+    const productCart: any = productReceipt ? productReceipt.items : [];
+    if (productCart && productCart.length > 0) {
+        productCart.map((el: any, index: any) => {
+
+            if (el.variant_title) {
+                params[`product${index + 1}_id`] = el.product_id;
+                params[`product${index + 1}_qty`] = el.product_qty;
+                params[`product${index + 1}_price`] = el.price;
+                params[`variant${index + 1}_id`] = el.variant_id;
+            } else {
+                params[`product${index + 1}_id`] = el.product_id;
+                params[`product${index + 1}_qty`] = el.product_qty;
+                params[`product${index + 1}_price`] = el.price;
+            }
+        });
+    }
+
+    const response = await request('/confirmPayPal', params);
+    if (response.result === "SUCCESS") {
+        // Important for DataLayer and CAPI
+        const mapppedData = mapToProductCart(response.message.items);
+        saveToStorage('productCart', mapppedData, 'session');
+        saveToStorage('subTotal', response.message.subTotal, 'session');
+        saveToStorage('shipping', response.message.shipTotal, 'session');
+        saveToStorage('tax', response.message.taxTotal, 'session');
+        saveToStorage('cartTotal', response.message.totalAmount, 'session');
+        saveToStorage('orderId', response.message.orderId, 'session');
+        // add puchased items in session to use on thankyou page
+        saveToStorage('productReceipt', { subTotal: response.message.subTotal, shipping: response.message.shipTotal, tax: response.message.taxTotal, total: response.message.totalAmount, items: mapppedData }, 'session');
+        // checkoutStore.setStepCompleted(1);
+        // checkoutStore.updateConfirmPaypalLoading(false);
+        await router.push({ path: '/upsell1', state: { from: 'importorder' } });
+        return true;
+    }
+    if (response.result === "ERROR") {
+        const formStore = useFormStore();
+        formStore.apiErrorAlert = { status: true, message: response.message };
+        // checkoutStore.updateAlert(true, response.message);
+        // checkoutStore.updateConfirmPaypalLoading(false);
+        return false;
     }
 }
 

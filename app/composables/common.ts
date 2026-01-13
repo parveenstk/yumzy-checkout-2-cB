@@ -1,3 +1,4 @@
+import CryptoJS from "crypto-js";
 import type { ProductReceipt, ProductReceiptSessionItems } from "~/utils/interface";
 import { useCheckoutStore, useFormStore } from "~~/stores";
 
@@ -8,7 +9,7 @@ declare global {
     }
 }
 
-export const params = (type: string = "lead") => {
+export const params = async (type: string = "lead") => {
 
     // Config
     const config = env();
@@ -25,13 +26,13 @@ export const params = (type: string = "lead") => {
     });
 
     if (formStore.paymentMethod === 'creditCard' && type === 'lead') {
-        if (!formFields.billingFirstName || !formFields.billingLastName || !formFields.email) return;
+        if (!formFields.shipFirstName || !formFields.shipLastName || !formFields.email) return;
     }
 
     const param: { [key: string]: string | number } = {
         sessionId: getFromStorage('sessionId', "session")!,
-        firstName: formStore.paymentMethod === 'creditCard' ? formFields.billingFirstName : formFields.firstName,
-        lastName: formStore.paymentMethod === 'creditCard' ? formFields.billingLastName : formFields.lastName,
+        firstName: formStore.paymentMethod === 'creditCard' ? formFields.billingFirstName : formFields.shipFirstName,
+        lastName: formStore.paymentMethod === 'creditCard' ? formFields.billingLastName : formFields.shipLastName,
         emailAddress: formFields.email,
         phoneNumber: formFields.phoneNumber,
         address1: formFields.billingStreetAddress,
@@ -73,18 +74,39 @@ export const params = (type: string = "lead") => {
     const stickerValid = cart.find(product => product.productId === config.ogBags[0]) || cart.find(product => product.ProductVariantName === config.sourBags[0]);
     if (!stickerValid) cart.push(stickerPrd); // Add sticker to cart if valid
 
+    const sub = getFromStorage('sub', 'session'); // check subscription status
+
     // Map through cart and add product details to param
-    cart.forEach((product, index) => {
+    for (let index = 0; index < cart.length; index++) {
+        const product = cart[index]!;
+
         if (product.ProductVariantName) {
-            param[`product${index + 1}_id`] = config.gummyId.toString();
+            const prId = await findProductId(product.productId);
+            param[`product${index + 1}_id`] = sub
+                ? prId
+                : config.gummyId.toString();
+
             param[`product${index + 1}_qty`] = '1';
-            if (checkoutStore.activeTab === 'onetime') param[`product${index + 1}_price`] = checkoutStore.calculateBagPrice(product.BagsQty!, productPrice.value).toString();
-            param[`variant${index + 1}_id`] = product.productId.toString();
+
+            if (checkoutStore.activeTab === 'onetime') {
+                param[`product${index + 1}_price`] =
+                    checkoutStore
+                        .calculateBagPrice(
+                            product.BagsQty!,
+                            productPrice.value
+                        )
+                        .toString();
+            }
+
+            param[`variant${index + 1}_id`] =
+                product.productId.toString();
         } else {
-            param[`product${index + 1}_id`] = product.productId.toString();
+            param[`product${index + 1}_id`] =
+                product.productId.toString();
+
             param[`product${index + 1}_qty`] = '1';
         }
-    });
+    }
 
     if (type === 'order') {
         param.shipProfileId = formFields.shipProfile;
@@ -94,7 +116,7 @@ export const params = (type: string = "lead") => {
         param.cardSecurityCode = formFields.cardCVV;
         param.cardYear = formFields.expiryYear;
         param.orderId = checkoutStore.orderId;
-        if (formStore.paymentMethod?.toUpperCase() === 'PAYPAL') param.paypalBillerId = 78;
+        if (formStore.paymentMethod?.toUpperCase() === 'PAYPAL') param.paypalBillerId = config.paypalBillerId;
     }
 
     return param
@@ -210,11 +232,11 @@ export const fbCAPI = async (eventType: string) => {
         items: order.productCart
     }
 
-    if (eventType !== 'Checkout') {
+    if (eventType !== 'InitiateCheckout') {
         customData.order_id = order.orderId
     }
 
-    const standardEvents = ['PageView', 'AddToCart', 'Checkout', 'Purchase']
+    const standardEvents = ['PageView', 'AddToCart', 'InitiateCheckout', 'Purchase']
 
     if (standardEvents.includes(eventType)) {
         // console.log('Standard Event Tracked:', eventType)
@@ -243,3 +265,157 @@ export const UpsellsfbCAPI = async (datalayerobj: any) => {
     // Upsells are usually custom events
     window.fbq('trackCustom', datalayerobj.event, customData)
 };
+
+// Find Product Id based on variantId
+const findProductId = async (variantId: number) => {
+    const config = env();
+    const subProductIds = config.subBags;
+    const ogSub = config.ogBagsSub;
+    const sourSub = config.sourBagsSub;
+    let index = 0
+
+    index = ogSub.findIndex((id) => id === variantId) ?? sourSub.findIndex((id) => id === variantId) ?? 0;
+    console.log("variantId", variantId, subProductIds[index])
+    return subProductIds[index];
+};
+
+export const fbCAPIAPI = async (eventType: string) => {
+    const config = env();
+    const fbPixelId = config.pixel_id;
+    const fbaccess_token = config.access_token;
+    if (!fbPixelId || !fbaccess_token) return;
+    const hashedEmail = SHA256('testemail@email.com');
+    const hashedPhoneNumber = SHA256(12345679890);
+    const getOrderDetail = await getOrderDetails();
+    const user_data = {
+        client_ip_address: getOrderDetail.ipAddress,
+        client_user_agent: navigator.userAgent,
+        em: hashedEmail,
+        ph: hashedPhoneNumber,
+        // Additional hashed fields if `Purchase` event
+        ...eventType !== "InitiateCheckout" && {
+            fn: await SHA256(getOrderDetail.firstName),
+            ln: await SHA256(getOrderDetail.lastName),
+            ct: await SHA256(getOrderDetail.city),
+            st: await SHA256(getOrderDetail.state),
+            zp: await SHA256(getOrderDetail.postalCode),
+            country: await SHA256(getOrderDetail.country),
+            fbc: getCookie("_fbc") || createFBCID(),
+            fbp: getCookie("_fbp")
+        }
+    };
+    const custom_data = {
+        currency: "USD",
+        value: getOrderDetail.cartTotal,
+        item: getOrderDetail.productCart,
+        ...(eventType !== "InitiateCheckout" && {
+            orderid: getOrderDetail.orderId
+        })
+    };
+
+    const params = [
+        {
+            event_name: eventType,
+            event_time: Math.floor(Date.now() / 1000),
+            event_id: eventType != "Purchase" ? 1 : getOrderDetail.orderId,
+            event_source_url: window.location.href,
+            action_source: "website",
+            user_data: user_data,
+            custom_data: custom_data,
+        },
+    ];
+    await request('facebookApi', params, false, 'post');
+}
+export const UpsellsfbCAPIAPI = async (datalayerobj: any) => {
+    const config = env();
+    const fbPixelId = config.pixel_id;
+    const fbaccess_token = config.access_token;
+    if (!fbPixelId || !fbaccess_token) return;
+    const getOrderDetail = await getOrderDetails();
+    const user_data = {
+        client_ip_address: getOrderDetail.ipAddress,
+        client_user_agent: navigator.userAgent,
+        // Additional hashed fields if `Purchase` event
+    };
+    const custom_data = {
+        currency: "USD",
+        value: datalayerobj.value,
+        ItemPrice: datalayerobj.ItemPrice,
+        ItemQty: datalayerobj.ItemQty,
+        ItemName: datalayerobj.ItemName,
+        orderid: datalayerobj.orderid
+
+    };
+
+    const params = [
+        {
+            event_name: datalayerobj.event,
+            event_time: Math.floor(new Date().getTime() / 1000),
+            event_id: datalayerobj.orderid,
+            event_source_url: window.location.href,
+            action_source: "website",
+            user_data: user_data,
+            custom_data: custom_data,
+        },
+    ];
+    await request('facebookApi', params, false, 'post');
+}
+export const SHA256 = (data: any) => {
+    return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
+}
+// Function to get the fbclid from URL parameters
+export function getFbclid() {
+    const urlParameterString = new URLSearchParams(window.location.search);
+    return urlParameterString.get("fbclid");
+}
+
+// Function to create the fbc ID
+export function createFBCID() {
+    const subdomainIndex = getSubdomainIndex();
+    const creationTime = getCreationTime();
+    const fbclid = getFbclid();
+
+    if (fbclid) {
+        return `fb.${subdomainIndex}.${creationTime}.${fbclid}`;
+    }
+
+    return "Click ID is not present in the URL parameters";
+}
+// fbc and fbp
+export function getCookie(name: string) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+        const part = parts.pop();
+        if (part !== undefined) {
+            return part.split(";").shift();
+        }
+    }
+}
+// Function to get the subdomain index
+export function getSubdomainIndex() {
+    const hostname = window.location.hostname;
+    const subdomain = hostname.split(".")[0];
+    return Math.abs(hashCode(subdomain!));
+}
+
+// Function to get the creation time (first page view timestamp)
+export function getCreationTime() {
+    const creationTimeKey = "creation_time";
+    let creationTime: any = localStorage.getItem(creationTimeKey);
+    if (!creationTime) {
+        creationTime = Math.floor(Date.now() / 1000); // Unix timestamp in seconds
+        localStorage.setItem(creationTimeKey, creationTime);
+    }
+    return creationTime;
+}
+//  Helper function to generate a consistent hash code for a string
+export function hashCode(str: string) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
