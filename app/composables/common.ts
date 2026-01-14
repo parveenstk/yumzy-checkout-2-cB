@@ -71,7 +71,7 @@ export const params = async (type: string = "lead") => {
     };
 
     // Ensure sticker is valid in the cart by checking OG Bags or Sour Bags 1 Bag
-    const stickerValid = cart.find(product => product.productId === config.ogBags[0]) || cart.find(product => product.ProductVariantName === config.sourBags[0]);
+    const stickerValid = cart.find(product => product.productId === config.ogBags[0] || product.productId === config.ogBagsSub[0] || product.productId === config.sourBags[0] || product.productId === config.sourBagsSub[0]);
     if (!stickerValid) cart.push(stickerPrd); // Add sticker to cart if valid
 
     const sub = getFromStorage('sub', 'session'); // check subscription status
@@ -82,10 +82,11 @@ export const params = async (type: string = "lead") => {
 
         if (product.ProductVariantName) {
             const prId = await findProductId(product.productId);
-            param[`product${index + 1}_id`] = sub
-                ? prId
-                : config.gummyId.toString();
-
+            if (sub && (prId == null)) {
+                formStore.apiErrorAlert = { status: true, message: "Something went wrong" };
+                return
+            };
+            param[`product${index + 1}_id`] = sub && prId ? prId : config.gummyId.toString();
             param[`product${index + 1}_qty`] = '1';
 
             if (checkoutStore.activeTab === 'onetime') {
@@ -267,18 +268,21 @@ export const UpsellsfbCAPI = async (datalayerobj: any) => {
 };
 
 // Find Product Id based on variantId
-const findProductId = async (variantId: number) => {
-    const config = env();
-    const subProductIds = config.subBags;
-    const ogSub = config.ogBagsSub;
-    const sourSub = config.sourBagsSub;
-    let index = 0
+const findProductId = async (variantId: number): Promise<number | null> => {
+    const { ogBagsSub, sourBagsSub, subBags } = env();
 
-    index = ogSub.findIndex((id) => id === variantId) ?? sourSub.findIndex((id) => id === variantId) ?? 0;
-    console.log("variantId", variantId, subProductIds[index])
-    return subProductIds[index];
+    const ogIndex = ogBagsSub.indexOf(variantId);
+    if (ogIndex !== -1) {
+        return subBags[ogIndex] ?? null;
+    }
+
+    const sourIndex = sourBagsSub.indexOf(variantId);
+    if (sourIndex !== -1) {
+        return subBags[sourIndex] ?? null;
+    }
+
+    return null;
 };
-
 export const fbCAPIAPI = async (eventType: string) => {
     const config = env();
     const fbPixelId = config.pixel_id;

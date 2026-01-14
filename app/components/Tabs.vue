@@ -15,13 +15,25 @@ const updateActiveTab = (tab: string) => {
     formStore.formFields.shipProfile = updatedShipProfile(tab, bagQty!, config.shipProfiles)
     checkoutStore.calculateTotalPrice;
 
-    // console.log("On Tab change:", formStore.formFields.shipProfile)
+    const selectedGummyType = getFromStorage("selectedGummyType", 'session') || "ogBags";
+    checkoutStore.selectedGummyType = selectedGummyType as 'ogBags' | 'sourBags';
+    const type = checkoutStore.selectedGummyType;
+    const selectedBag = ref(getFromStorage("selectedGummyBag", 'session') ? Number(getFromStorage("selectedGummyBag", 'session')) : 3);
+    const variantId = tab === 'subscribe' ? config[`${type as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[type as 'ogBags' | 'sourBags'][selectedBag.value - 1];
+
+    if (!variantId) {
+        console.error("Variant ID not found for the selected tab and bag quantity.");
+        return;
+    };
+
+    checkoutStore.selectedQuantity = variantId;
+    checkoutStore.addGummyProduct();
 };
 
 onMounted(async () => {
-    const subStatus = await getFromStorage('sub', 'session')
-    // console.log("subStatus", subStatus)
-    saveToStorage("sub", subStatus ?? true, 'session');
+    saveToStorage("sub", true, 'session');
+    saveToStorage("selectedGummyType", "ogBags", 'session');
+
     // initialize activeTab
     checkoutStore.activeTab = 'subscribe';
 

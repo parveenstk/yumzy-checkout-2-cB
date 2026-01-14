@@ -119,6 +119,8 @@ function startCountdown() {
 const addProductData = (id: number) => {
     const sub = getFromStorage('sub', 'session'); // check subscription status
     selectedBag.value = id;
+    saveToStorage("selectedGummyType", checkoutStore.selectedGummyType, 'session');
+    saveToStorage("selectedGummyBag", selectedBag.value, 'session');
     const variantId = sub ? config[`${checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'][selectedBag.value - 1];
     if (!variantId) return;
 
@@ -149,12 +151,14 @@ const calculateComparePrice = () => {
 const switchGummyType = (type: string) => {
     const sub = getFromStorage('sub', 'session'); // check subscription status
     checkoutStore.selectedGummyType = type;
+    saveToStorage("selectedGummyType", type, 'session');
     const bagQty = selectedBag.value;
+    saveToStorage("selectedGummyBag", bagQty, 'session');
     const activeBag = gummyBagsSelector.find(bag => bag.id === bagQty)!;
     if (!activeBag) return;
 
-    // const variantId = activeBag.variant[type]?.id;
     const variantId = sub ? config[`${type as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[type as 'ogBags' | 'sourBags'][selectedBag.value - 1];
+
     if (!variantId) return;
 
     checkoutStore.selectedQuantity = variantId;
