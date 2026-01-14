@@ -120,6 +120,7 @@ const addProductData = (id: number) => {
     const sub = getFromStorage('sub', 'session'); // check subscription status
     selectedBag.value = id;
     saveToStorage("selectedGummyType", checkoutStore.selectedGummyType, 'session');
+    saveToStorage("selectedGummyBag", selectedBag.value, 'session');
     const variantId = sub ? config[`${checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'}Sub`][selectedBag.value - 1] : config[checkoutStore.selectedGummyType as 'ogBags' | 'sourBags'][selectedBag.value - 1];
     if (!variantId) return;
 

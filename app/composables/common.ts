@@ -82,14 +82,11 @@ export const params = async (type: string = "lead") => {
 
         if (product.ProductVariantName) {
             const prId = await findProductId(product.productId);
-            if (!prId || prId === null) {
+            if (sub && (prId == null)) {
                 formStore.apiErrorAlert = { status: true, message: "Something went wrong" };
                 return
             };
-            param[`product${index + 1}_id`] = sub
-                ? prId
-                : config.gummyId.toString();
-
+            param[`product${index + 1}_id`] = sub && prId ? prId : config.gummyId.toString();
             param[`product${index + 1}_qty`] = '1';
 
             if (checkoutStore.activeTab === 'onetime') {
