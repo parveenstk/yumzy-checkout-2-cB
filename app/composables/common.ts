@@ -71,7 +71,7 @@ export const params = async (type: string = "lead") => {
     };
 
     // Ensure sticker is valid in the cart by checking OG Bags or Sour Bags 1 Bag
-    const stickerValid = cart.find(product => product.productId === config.ogBags[0]) || cart.find(product => product.ProductVariantName === config.sourBags[0]);
+    const stickerValid = cart.find(product => product.productId === config.ogBags[0] || product.productId === config.ogBagsSub[0] || product.productId === config.sourBags[0] || product.productId === config.sourBagsSub[0]);
     if (!stickerValid) cart.push(stickerPrd); // Add sticker to cart if valid
 
     const sub = getFromStorage('sub', 'session'); // check subscription status
