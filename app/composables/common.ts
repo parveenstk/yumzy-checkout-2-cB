@@ -82,6 +82,10 @@ export const params = async (type: string = "lead") => {
 
         if (product.ProductVariantName) {
             const prId = await findProductId(product.productId);
+            if (!prId || prId === null) {
+                formStore.apiErrorAlert = { status: true, message: "Something went wrong" };
+                return
+            };
             param[`product${index + 1}_id`] = sub
                 ? prId
                 : config.gummyId.toString();
@@ -267,18 +271,21 @@ export const UpsellsfbCAPI = async (datalayerobj: any) => {
 };
 
 // Find Product Id based on variantId
-const findProductId = async (variantId: number) => {
-    const config = env();
-    const subProductIds = config.subBags;
-    const ogSub = config.ogBagsSub;
-    const sourSub = config.sourBagsSub;
-    let index = 0
+const findProductId = async (variantId: number): Promise<number | null> => {
+    const { ogBagsSub, sourBagsSub, subBags } = env();
 
-    index = ogSub.findIndex((id) => id === variantId) ?? sourSub.findIndex((id) => id === variantId) ?? 0;
-    console.log("variantId", variantId, subProductIds[index])
-    return subProductIds[index];
+    const ogIndex = ogBagsSub.indexOf(variantId);
+    if (ogIndex !== -1) {
+        return subBags[ogIndex] ?? null;
+    }
+
+    const sourIndex = sourBagsSub.indexOf(variantId);
+    if (sourIndex !== -1) {
+        return subBags[sourIndex] ?? null;
+    }
+
+    return null;
 };
-
 export const fbCAPIAPI = async (eventType: string) => {
     const config = env();
     const fbPixelId = config.pixel_id;
