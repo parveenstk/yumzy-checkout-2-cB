@@ -122,7 +122,7 @@ export const headerContent = {
     },
 
     flag: {
-        src: "/images/flag.png",
+        src: "/images/US.png",
         alt: "US Flag",
         width: 64,
         height: 38,

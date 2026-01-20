@@ -53,6 +53,9 @@ const phonePlaceholder = computed(() =>
         : 'Phone number for tracking information'
 )
 
+// Selected Country
+const selectedCountry = computed(() => formStore.formFields.shipCountry || 'US');
+
 // carousel slider
 const activeSlide = ref(0)
 const currentSlide = computed(() => slides[activeSlide.value])
@@ -530,7 +533,10 @@ watch(checkoutStore.cartData, (newCartData) => {
                                     <div class="flex items-center justify-center gap-2 lg:gap-4 w-full mt-4 m-0">
                                         <div
                                             class="flex justify-center items-center gap-1 bg-white shadow-md lg:px-4 px-3 rounded-md h-[58px]">
-                                            <NuxtImg src="/images/flag.png" alt="US Flag" class="lg:h-5 h-4 w-auto" />
+                                            <div class="h-5 w-10 lg:w-13 flex items-center justify-center">
+                                                <NuxtImg :src="`/images/${selectedCountry.toUpperCase()}.png`"
+                                                    :alt="`${selectedCountry} Flag`" preload />
+                                            </div>
                                             <p class="text-gray font-bold">+1</p>
                                         </div>
 
@@ -539,7 +545,7 @@ watch(checkoutStore.cartData, (newCartData) => {
                                             :placeholder="phonePlaceholder"
                                             :class="[
                                                 'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                errors.phoneNumber ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="16" />
+                                                errors.phoneNumber ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="10" />
                                     </div>
                                     <p v-if="errors.phoneNumber" class="ml-22 md:ml-25 mt-1 text-sm text-[#e6193c]">
                                         {{ errors.phoneNumber }}
@@ -592,18 +598,18 @@ watch(checkoutStore.cartData, (newCartData) => {
                                 </p>
 
                                 <!-- Shipping - Country -->
-                                <select v-model="formFields.shipCounty" name="shipCounty" @change="
+                                <select v-model="formFields.shipCountry" name="shipCountry" @change="
                                     formStore.handleCountry(($event.target as HTMLInputElement).value, 'ship');
-                                formStore.validateField('shipCounty', ($event.target as HTMLInputElement).value);"
+                                formStore.validateField('shipCountry', ($event.target as HTMLInputElement).value);"
                                     :class="['w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                        errors.shipCounty ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
+                                        errors.shipCountry ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
                                     <option value="">-- Choose Country --</option>
                                     <option v-for="country in checkoutStore.availableCountires"
                                         :value="country.countryCode">
                                         {{ country.countryName }}</option>
                                 </select>
-                                <p v-if="errors.shipCounty" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                    {{ errors.shipCounty }}
+                                <p v-if="errors.shipCountry" class="ml-2 mt-1 text-sm text-[#e6193c]">
+                                    {{ errors.shipCountry }}
                                 </p>
 
                                 <!-- Shipping - States -->

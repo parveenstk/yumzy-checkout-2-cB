@@ -48,7 +48,7 @@ export const params = async (type: string = "lead") => {
         shipPostalCode: formFields.shipPostalCode,
         shipCity: formFields.shipCity,
         shipState: formFields.shipState,
-        shipCountry: formFields.shipCounty,
+        shipCountry: formFields.shipCountry,
         emailOptIn: '1',
         salesUrl: window.location.href,
         pageType: 'checkout',

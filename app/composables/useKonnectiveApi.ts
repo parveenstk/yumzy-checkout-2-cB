@@ -6,7 +6,6 @@ import { mapToProductCart, params } from "./common";
 
 const api = axios.create({
     baseURL: 'api/konnective', // change this to your API base URL
-    // baseURL: 'http://localhost:3000/api/konnective', // Absolute URL required in Node.js
     headers: {
         'Content-Type': 'application/json',
     },
@@ -137,16 +136,17 @@ export const importClick = async () => {
     const response = await request('/importClick', {
         pageType: pageType,
         requestUri: window.location.href,
-        sessionId: getFromStorage('sessionId', 'session') || '',
+        sessionId: getFromStorage('sessionId', 'local') || '',
         campaignId: config.campaignId
     });
 
     if (response.result !== 'SUCCESS') formStore.apiErrorAlert = { status: true, message: response.message };
 
-    // console.log('importClick response.resutl:', response.result)
-    // console.log('importClick response.message:', response.message)
+    saveToStorage('sessionId', response.message.sessionId, 'local');
     saveToStorage('sessionId', response.message.sessionId, 'session');
-    console.log("sessionId:", getFromStorage('sessionId', 'session'));
+
+    console.log("sessionId-local:", getFromStorage('sessionId', 'local'));
+    console.log("sessionId-session:", getFromStorage('sessionId', 'session'));
 };
 
 // Fetch Import Lead
@@ -168,9 +168,9 @@ export const importLead = async () => {
         return;
     };
 
-    saveToStorage("orderId", response.message.orderId, "session");
+    saveToStorage("orderId", response.message.orderId, "local");
     checkoutStore.orderId = response.message.orderId;
-    console.log('orderId:', getFromStorage('orderId', 'session'));
+    console.log('orderId:', getFromStorage('orderId', 'local'));
 };
 
 // Import Order
@@ -191,8 +191,10 @@ export const importOrder = async () => {
     // console.log('formStore.apiErrorAlert:', formStore.apiErrorAlert);
 
     const mapppedData = mapToProductCart(response.message.items);
+
     // add puchased items in session to use on thankyou page
     saveToStorage('productReceipt', { subTotal: response.message.subTotal, shipping: response.message.shipTotal, tax: response.message.taxTotal, total: response.message.totalAmount, items: mapppedData }, "session");
+
     // Important for DataLayer and CAPI
     saveToStorage('productCart', mapppedData, "session");
     saveToStorage('subTotal', response.message.subTotal, "session");
@@ -237,7 +239,7 @@ export const importUpsell = async ({ productId, productQty, productPrice, varian
     const checkoutStore = useCheckoutStore();
     checkoutStore.setTransactionStatus(true);
 
-    const orderId = await getFromStorage('orderId', "session");
+    const orderId = await getFromStorage('orderId', "local");
     const params = {
         orderId,
         productId,
@@ -348,8 +350,10 @@ export const confirmPaypal = async () => {
         saveToStorage('tax', response.message.taxTotal, 'session');
         saveToStorage('cartTotal', response.message.totalAmount, 'session');
         saveToStorage('orderId', response.message.orderId, 'session');
+
         // add puchased items in session to use on thankyou page
         saveToStorage('productReceipt', { subTotal: response.message.subTotal, shipping: response.message.shipTotal, tax: response.message.taxTotal, total: response.message.totalAmount, items: mapppedData }, 'session');
+        
         // checkoutStore.setStepCompleted(1);
         // checkoutStore.updateConfirmPaypalLoading(false);
         await router.push({ path: '/upsell1', state: { from: 'importorder' } });

@@ -22,7 +22,7 @@ export interface FormFields {
     shipStreetAddress: string;
     shipApptsAddress: string;
     shipCity: string;
-    shipCounty: string;
+    shipCountry: string;
     shipState: string;
     shipPostalCode: string;
 
