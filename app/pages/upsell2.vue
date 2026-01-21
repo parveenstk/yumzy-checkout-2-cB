@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { UpsellsfbCAPI } from '~/composables/common';
+import { upsellUrls } from '~/composables/data';
 import { useUpsellsDataLayer } from '~/composables/useGtm.client';
 import { useCheckoutStore } from '~~/stores';
 
@@ -72,8 +73,8 @@ const callImportUpsell = () => {
                     </h1>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent desktopUrl="https://get.yumzy.com/video/upsell2/landscape-video_compatible.mp4"
-                        mobileUrl="https://get.yumzy.com/video/upsell2/vertical_fixed3.mp4" />
+                    <UpsellVideoContent :desktopUrl="upsellUrls.upsell2.deskotp"
+                        :mobileUrl="upsellUrls.upsell2.mobile" />
 
                     <div class="px-[10px] mb-5">
                         <select v-model="selectedVariantId"

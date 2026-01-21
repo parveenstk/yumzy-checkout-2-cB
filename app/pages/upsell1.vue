@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { fbCAPI } from '~/composables/common';
+import { upsellUrls } from '~/composables/data';
 import { useOrderDataLayer } from '~/composables/useGtm.client';
 import { useCheckoutStore } from '~~/stores';
 
@@ -69,8 +70,8 @@ const isUpsellOpen = ref(false)
                         Guarantees your shipment <br> arrives in 2 days or less for only $9.99! </h2>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent desktopUrl="https://get.yumzy.com/video/upsell1/landscape-video.mp4"
-                        mobileUrl="https://get.yumzy.com/video/upsell1/vertical-video.mp4" />
+                    <UpsellVideoContent :desktopUrl="upsellUrls.upsell1.deskotp"
+                        :mobileUrl="upsellUrls.upsell1.mobile" />
 
                     <div class="arrow relative">
                         <NuxtImg src="/images/blue-arrow.png" alt="blue-arrow.png-Img"
