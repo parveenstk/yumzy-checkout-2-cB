@@ -129,6 +129,7 @@ const addProductData = (id: number) => {
 
     checkoutStore.selectedQuantity = variantId;
     checkoutStore.addGummyProduct();
+    useOrderDataLayer("AddToCart");
 };
 
 // Calculate total compareAt price
