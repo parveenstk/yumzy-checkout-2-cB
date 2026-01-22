@@ -73,7 +73,8 @@ const callImportUpsell = () => {
                     </h1>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent :desktopUrl="upsellUrls.upsell2.deskotp"
+                    <UpsellVideoContent :thumbnailDesktop="upsellUrls.upsell2.thumbnailDesktop"
+                        :desktopUrl="upsellUrls.upsell2.deskotp" :thumbnailMobile="upsellUrls.upsell2.thumbnailMobile"
                         :mobileUrl="upsellUrls.upsell2.mobile" />
 
                     <div class="px-[10px] mb-5">

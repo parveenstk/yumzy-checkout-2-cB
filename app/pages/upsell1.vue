@@ -70,7 +70,8 @@ const isUpsellOpen = ref(false)
                         Guarantees your shipment <br> arrives in 2 days or less for only $9.99! </h2>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent :desktopUrl="upsellUrls.upsell1.deskotp"
+                    <UpsellVideoContent :thumbnailDesktop="upsellUrls.upsell1.thumbnailDesktop"
+                        :desktopUrl="upsellUrls.upsell1.deskotp" :thumbnailMobile="upsellUrls.upsell1.thumbnailMobile"
                         :mobileUrl="upsellUrls.upsell1.mobile" />
 
                     <div class="arrow relative">

@@ -7,6 +7,14 @@ const props = defineProps({
     mobileUrl: {
         type: String,
         required: true
+    },
+    thumbnailDesktop: {
+        type: String,
+        required: false
+    },
+    thumbnailMobile: {
+        type: String,
+        required: false
     }
 })
 
@@ -52,7 +60,7 @@ onMounted(() => {
     <div class="relative mt-4 mb-6">
 
         <!-- desktop view -->
-        <video ref="desktopRef" playsinline
+        <video ref="desktopRef" playsinline :poster="props.thumbnailDesktop"
             class="hidden sm:block mx-auto sm:w-[90%] md:w-full max-w-[800px] object-contain cursor-pointer rounded-xl"
             @click="toggleVideo">
             <source :src="props.desktopUrl" type="video/mp4" />
@@ -66,7 +74,7 @@ onMounted(() => {
 
         <!-- mobile view -->
         <div class="relative mt-4 mb-6">
-            <video ref="mobileRef" playsinline
+            <video ref="mobileRef" playsinline :poster="props.thumbnailMobile"
                 class="sm:hidden block mx-auto max-h-[425px] object-contain cursor-pointer rounded-xl"
                 @click="toggleVideo2" aria-label="Video showing expedited shipping offer">
                 <source :src="props.mobileUrl" type="video/mp4" />
