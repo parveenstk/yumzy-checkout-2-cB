@@ -120,7 +120,6 @@ onMounted(async () => {
                             <span class="font-black text-[#172969] [text-shadow:0_0_0.8px_#172969]">
                                 90-Day 200% Happiness Guarantee
                             </span>
-
                             <br /> If you don't love it, we’ll refund double what you paid!
                         </p>
                     </div>
@@ -148,14 +147,6 @@ onMounted(async () => {
                                 - Number(checkoutStore.cartData[0]?.productPrice)).toFixed(2) }} and recieve FREE GIFTS when
                             you subscribe. Plus, you can easily pause, skip or cancel your subscription any time!
                         </p>
-
-                        <!-- <p v-else class="text-sm lg:text-lg text-gray-600">
-                            You'll instantly save ${{ (checkoutStore.calculateSubtotalPrice('productPrice', false)
-                                - Number(checkoutStore.cartData[0]?.productPrice)).toFixed(2) }}
-                            and get FREE SHIPPING and FREE GIFTS when you subscribe.
-                            Plus, you can cancel or pause your subscription any time!
-                        </p> -->
-
                     </div>
                 </div>
             </div>

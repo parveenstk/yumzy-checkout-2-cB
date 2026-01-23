@@ -129,6 +129,8 @@ const addProductData = (id: number) => {
 
     checkoutStore.selectedQuantity = variantId;
     checkoutStore.addGummyProduct();
+    fbCAPI("AddToCart");
+    fbCAPIAPI("AddToCart");
     useOrderDataLayer("AddToCart");
 };
 

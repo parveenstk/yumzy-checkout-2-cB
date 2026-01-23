@@ -23,12 +23,10 @@
 
     100% {
         transform: rotate(-360deg);
-        /* anticlockwise */
     }
 }
 
 .arrowimg {
-    /* -webkit-animation: leftdemote 0s infinite; */
     animation: leftdemote 3.5s infinite;
     top: 0px;
     left: -10px;
