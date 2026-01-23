@@ -157,13 +157,13 @@ export const upsellUrls = {
     upsell1: {
         deskotp: "https://get.yumzy.com/video/upsell1/landscape-video-lowbitrate.mp4",
         mobile: "https://get.yumzy.com/video/upsell1/vertical-video-lowbitrate.mp4",
-        thumbnailDesktop: "/images/upsell1-desktop.webp",
-        thumbnailMobile: "/images/upsell1-mobile.webp"
+        thumbnailDesktop: "https://get.yumzy.com/video/upsell1/thumbnail-desktop.webp",
+        thumbnailMobile: "https://get.yumzy.com/video/upsell1/thumbnail-mobile.webp"
     },
     upsell2: {
         deskotp: "https://get.yumzy.com/video/upsell2/landscape-video-web.mp4",
         mobile: "https://get.yumzy.com/video/upsell2/vertical_fixed3-lowbitrate.mp4",
-        thumbnailDesktop: "/images/upsell2-desktop.webp",
-        thumbnailMobile: "/images/upsell2-mobile.webp"
+        thumbnailDesktop: "https://get.yumzy.com/video/upsell2/thumbnail-desktop.webp",
+        thumbnailMobile: "https://get.yumzy.com/video/upsell2/thumbnail-mobile.webp"
     }
 }
