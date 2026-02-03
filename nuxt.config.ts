@@ -34,6 +34,7 @@ export default defineNuxtConfig({
       pixel_id: "2090427268412378",
       access_token: "EAARsmWv5SHcBQc51itc624zpCVwke9jjtjmIfVeyKnVBOtaqyYOU2yCWsZBdVaINYHtSxWdQLuZAaZBrSOZBShpkaAy9JsZBXBryog2gbpIDMVlESQkXCLy7HZCFRKgvFYqJZAte2o8DAExm0S4382F36jJZBQlJhawf5BLgdvrVStZCqQDqsHnKY1YPpJQANDgQ7IQZDZD",
       GTM_id: "W7MPKBF2",
+      googlePlacesKey: 'AIzaSyCGUGS13bVRhlZfyucIQpjqeorcjryOJdY',
       checkout: {
         lp1: {
           campaignId: 406,

@@ -17,11 +17,6 @@ export const faqs = [
         "answer": "With Standard Shipping, your order should arrive in 3-5 days. However, we’ve noticed many families want it sooner, so there’s an option for expedited shipping. This means it should arrive in 2 days."
     },
 
-    // {
-    //     "question": "Do I have to subscribe?",
-    //     "answer": `No, you don't. We offer a one-time purchase option for both OG Gummies and Sour Gummies so you can try Yumzy worry-free. Just select the "One-time purchase" option. If you love Yumzy, you can upgrade to a subscription anytime. Especially since that's the only way to get the best savings, FREE shipping, and 4 FREE gifts.`
-    // },
-
     {
         "question": "What is the difference between Yumzy and YOMZ?",
         "answer": "Yumzy is the family supplement brand that makes the products YOMZ OG Gummies and YOMZ Sour Gummies."
@@ -102,10 +97,16 @@ export const tabs = [
     },
 ]
 
-export const termsAndCondition = (price: string) => [
-    `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
-    "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
-]
+// export const termsAndCondition = (price: string) => [
+//     `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
+//     "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
+// ]
+
+export const getTermsHtml = (price: string) => ({
+    subscribe: `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
+    onetime:
+        "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
+})
 
 // Header.vue content
 export const headerContent = {
@@ -167,3 +168,29 @@ export const upsellUrls = {
         thumbnailMobile: "https://get.yumzy.com/video/upsell2/thumbnail-mobile.webp"
     }
 }
+
+export const heroTitle = {
+    section: {
+        imgPath: '/images/fire.svg',
+        text: 'Hurry. We currently have your order reserved. But Yumzy is selling like hotcakes, and we anticipate selling out soon.'
+    }
+}
+
+export const features = [
+    {
+        icon: '✓',
+        title: 'Manage Your Subscription',
+        description: 'Cancel, pause, or skip anytime!',
+        bgColor: 'bg-green-700',
+        borderColor: 'border-green-500',
+        textColor: 'text-green-700 [text-shadow:0_0_0.8px_#15803d]'
+    },
+    {
+        icon: '$',
+        title: '90-Day 200% Happiness Guarantee',
+        description: 'If you don’t love it, we’ll refund double what you paid!',
+        bgColor: 'bg-[#172969]',
+        borderColor: 'border-[#6e7eb8]',
+        textColor: 'text-[#172969] [text-shadow:0_0_0.8px_#172969]'
+    }
+]

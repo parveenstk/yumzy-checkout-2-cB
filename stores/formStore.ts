@@ -1,7 +1,7 @@
 // import { defineStore } from 'pinia'; 9
 import { defineStore } from 'pinia';
 import { reactive, ref, type Reactive } from 'vue';
-import { z, ZodError } from 'zod';
+import { object, z, ZodError } from 'zod';
 import { useCheckoutStore } from './checkoutStore';
 
 export const useFormStore = defineStore('formStore', () => {
@@ -28,7 +28,6 @@ export const useFormStore = defineStore('formStore', () => {
     const hasAttemptedSubmit = ref(false);
 
     // importOrder response
-    // const apiErrorAlert = ref({})
     const apiErrorAlert: Ref<{ status: boolean; message: string }> = ref({ status: false, message: "" })
 
     const formFields: Reactive<FormFields> = reactive({
@@ -63,7 +62,7 @@ export const useFormStore = defineStore('formStore', () => {
         billingState: '',
         billingPostalCode: '',
 
-        // Shif Profile
+        // Ship Profile
         shipProfile: '36'
     })
 
@@ -96,19 +95,19 @@ export const useFormStore = defineStore('formStore', () => {
     // Basic schema (always required for both payment methods)
     const basicSchema = z.object({
         shipFirstName: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
             .regex(nameRegex, 'Shipping first name contains only letters'),
         shipLastName: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
             .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
         phoneNumber: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(10, 'Phone number must be at least 10 digits')
             .max(15, 'Phone number must be at most 15 digits')
             .regex(phoneRegex, 'Phone contains only numbers'),
@@ -118,47 +117,47 @@ export const useFormStore = defineStore('formStore', () => {
 
         // Basic
         shipFirstName: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
             .regex(nameRegex, 'Shipping first name contains only letters'),
         shipLastName: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
             .max(15, 'Shipping first name must be at most 15 characters')
             .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
         phoneNumber: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(10, 'Phone number must be at least 10 digits')
             .max(15, 'Phone number must be at most 15 digits')
             .regex(phoneRegex, 'Phone contains only numbers'),
 
         // Shipping Address
         shipStreetAddress: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(5, 'Street address must be at least 5 characters')
             .max(100, 'Street address must be at most 100 characters')
             .regex(streetRegex, 'Invalid street address'),
 
         shipApptsAddress: z.string().optional(),
         shipCity: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'City must be at least 2 characters.')
             .max(30, 'City must be at most 30 characters.')
             .regex(cityRegex, 'City name can only contain letters'),
         shipCountry: z.string().regex(cityRegex, 'Invalid county'),
         shipState: z.string().regex(stateRegex, 'Invalid state'),
         shipPostalCode: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(5, 'Postal code must be at least 5 digits.')
             .max(10, 'Postal code must be at most 10 digits.')
             .regex(postalCodeRegex, 'Postal code must be between 5 and 10 digits'),
 
         // Credit card
         creditCardNumber: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(16, 'Credit card number must be at least 16 digits')
             .regex(/^\d{15,16}$/, 'Invalid credit card number'),
 
@@ -174,20 +173,20 @@ export const useFormStore = defineStore('formStore', () => {
             .regex(nameRegex, 'First name must contain only letters'),
         billingLastName: z.string().optional(),
         billingStreetAddress: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(5, 'Street address must be at least 5 characters')
             .max(100, 'Street address must be at most 100 characters')
             .regex(streetRegex, 'Invalid street address'),
         billingApptsAddress: z.string().optional(),
         billingCity: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(2, 'City must be at least 2 characters.')
             .max(30, 'City must be at most 30 characters.')
             .regex(cityRegex, 'Invalid city name.'),
         billingCounty: z.string().regex(cityRegex, 'Invalid county'),
         billingState: z.string().regex(stateRegex, 'Invalid state'),
         billingPostalCode: z.string()
-            .nonempty('This field is required.')
+            .nonempty('This field is required')
             .min(5, 'Postal code must be at least 5 digits.')
             .max(10, 'Postal code must be at most 10 digits.')
             .regex(postalCodeRegex, 'Postal code must be between 5 and 10 digits'),
@@ -295,7 +294,7 @@ export const useFormStore = defineStore('formStore', () => {
 
         allRequired.forEach(field => {
             if (!formFields[field] || formFields[field].toString().trim() === '') {
-                errors[field] = 'This field is required.';
+                errors[field] = 'This field is required';
                 hasEmpty = true;
             }
         });
@@ -453,7 +452,7 @@ export const useFormStore = defineStore('formStore', () => {
     };
 
     // Filter States
-    const handleCountry = (value: string, type: string = 'ship') => {
+    const handleCountry = async (value: string, type: string = 'ship') => {
         const filteredStates = checkoutStore.allCountries.filter(country => country.countryCode === value);
         // console.log('checkoutStore.allCountries:', checkoutStore.allCountries);
 
@@ -471,6 +470,13 @@ export const useFormStore = defineStore('formStore', () => {
         formFields.shipState = '';
     };
 
+    // clear the error of specific input fields
+    const handleError = (keys: (keyof typeof errors)[]) => {
+        keys.forEach(key => {
+            errors[key] = ''
+        })
+    }
+
     return {
         paymentMethod,  // Export payment method
         sameBilling,
@@ -486,6 +492,7 @@ export const useFormStore = defineStore('formStore', () => {
         hasEmptyFields,
         hasAttemptedSubmit,
         apiErrorAlert,
-        resetForm
+        resetForm,
+        handleError
     }
 });

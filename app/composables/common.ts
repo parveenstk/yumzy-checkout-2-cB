@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-import type { ProductReceipt, ProductReceiptSessionItems } from "~/utils/interface";
+import type { AddressComponent, ProductReceipt, ProductReceiptSessionItems } from "~/utils/interface";
 import { useCheckoutStore, useFormStore } from "~~/stores";
 
 declare global {
@@ -86,6 +86,7 @@ export const params = async (type: string = "lead") => {
                 formStore.apiErrorAlert = { status: true, message: "Something went wrong" };
                 return
             };
+
             param[`product${index + 1}_id`] = sub && prId ? prId : config.gummyId.toString();
             param[`product${index + 1}_qty`] = '1';
 
@@ -283,6 +284,7 @@ const findProductId = async (variantId: number): Promise<number | null> => {
 
     return null;
 };
+
 export const fbCAPIAPI = async (eventType: string) => {
     const config = env();
     const fbPixelId = config.pixel_id;
@@ -367,6 +369,7 @@ export const UpsellsfbCAPIAPI = async (datalayerobj: any) => {
 export const SHA256 = (data: any) => {
     return CryptoJS.SHA256(data).toString(CryptoJS.enc.Hex);
 }
+
 // Function to get the fbclid from URL parameters
 export function getFbclid() {
     const urlParameterString = new URLSearchParams(window.location.search);
@@ -385,6 +388,7 @@ export function createFBCID() {
 
     return "Click ID is not present in the URL parameters";
 }
+
 // fbc and fbp
 export function getCookie(name: string) {
     const value = `; ${document.cookie}`;
@@ -396,6 +400,7 @@ export function getCookie(name: string) {
         }
     }
 }
+
 // Function to get the subdomain index
 export function getSubdomainIndex() {
     const hostname = window.location.hostname;
@@ -413,6 +418,7 @@ export function getCreationTime() {
     }
     return creationTime;
 }
+
 //  Helper function to generate a consistent hash code for a string
 export function hashCode(str: string) {
     let hash = 0;
@@ -423,3 +429,70 @@ export function hashCode(str: string) {
     }
     return hash;
 }
+
+// It will extract address from API and will add in address fields in structure way 
+export const extractAddressComponents = async (addressComponents: AddressComponent[], type = 'ship') => {
+    console.log("addressComponents", addressComponents)
+    const formStore = useFormStore();
+    const handleError = formStore.handleError;
+    let streetNumber = '';
+    let route = '';
+    let locality = '';
+    let stateCode = '';
+    let countryCode = '';
+    let postalCode = '';
+
+    addressComponents.forEach(component => {
+        const types = component.types;
+
+        // Combine premise, route, and sublocality levels into streetNumber
+        if (types.includes('premise') || types.includes('street_number') ||
+            types.includes('sublocality_level_3') || types.includes('sublocality_level_2') ||
+            types.includes('sublocality_level_1') || types.includes('route')) {
+            streetNumber += ' ' + component.long_name;
+        } else if (types.includes('locality')) {
+            locality = component.long_name;
+        } else if (types.includes('administrative_area_level_1')) {
+            stateCode = component.short_name; // State
+        } else if (types.includes('country')) {
+            countryCode = component.short_name;
+        } else if (types.includes('postal_code')) {
+            postalCode = component.long_name; // Main postal code
+        }
+    });
+
+    // Log the extracted values
+    if (type === 'ship') {
+        formStore.formFields.shipStreetAddress = streetNumber;
+        formStore.formFields.shipCity = locality;
+        formStore.formFields.shipCountry = countryCode;
+        await formStore.handleCountry(countryCode)
+        formStore.formFields.shipState = stateCode;
+        formStore.formFields.shipPostalCode = postalCode;
+
+        handleError([
+            'shipStreetAddress',
+            'shipCity',
+            'shipCountry',
+            'shipState',
+            'shipPostalCode'
+        ])
+    }
+
+    if (formStore.sameBilling || type !== 'ship') {
+        formStore.formFields.billingStreetAddress = streetNumber + " " + route;
+        formStore.formFields.billingCity = locality;
+        formStore.formFields.billingCounty = countryCode;
+        await formStore.handleCountry(countryCode, 'bill')
+        formStore.formFields.billingState = stateCode;
+        formStore.formFields.billingPostalCode = postalCode;
+
+        handleError([
+            'billingStreetAddress',
+            'billingCity',
+            'billingCounty',
+            'billingState',
+            'billingPostalCode'
+        ])
+    }
+};

@@ -98,31 +98,7 @@ onMounted(async () => {
                 </div>
 
                 <div class="mt-5 space-y-4 lg:flex-row flex-col">
-                    <div class="flex items-start space-x-3 w-full">
-                        <div
-                            class="bg-green-700 rounded-full min-w-10 min-h-10 flex items-center justify-center border-3 border-green-500">
-                            <span class="text-white text-lg">✓</span>
-                        </div>
-                        <p class="text-sm">
-                            <span class="font-black text-green-700 [text-shadow:0_0_0.8px_#15803d]">
-                                Manage Your Subscription
-                            </span>
-                            <br /> Cancel, pause, or skip anytime!
-                        </p>
-                    </div>
-
-                    <div class="flex items-start space-x-3 w-full">
-                        <div
-                            class="bg-[#172969] rounded-full min-w-10 min-h-10 flex items-center justify-center border-3 border-[#6e7eb8]">
-                            <span class="text-white text-lg">$</span>
-                        </div>
-                        <p class="text-sm">
-                            <span class="font-black text-[#172969] [text-shadow:0_0_0.8px_#172969]">
-                                90-Day 200% Happiness Guarantee
-                            </span>
-                            <br /> If you don't love it, we’ll refund double what you paid!
-                        </p>
-                    </div>
+                    <FeatureItem v-for="(item, index) in features" :key="index" v-bind="item" />
                 </div>
             </div>
 
@@ -135,7 +111,7 @@ onMounted(async () => {
                             Total ${{ checkoutStore.calculateSubtotalPrice('productPrice', false).toFixed(2) }}
                         </p>
 
-                        <p v-if="checkoutStore.calculateSubtotalPrice('productPrice', false) === 58"
+                        <p v-if="checkoutStore.cartData[0]?.BagsQty === '1 Bag'"
                             class="text-sm lg:text-lg text-gray-600">
                             You'll instantly save ${{ (checkoutStore.calculateSubtotalPrice('productPrice', false)
                                 - Number(checkoutStore.cartData[0]?.productPrice)).toFixed(2) }}
@@ -147,6 +123,7 @@ onMounted(async () => {
                                 - Number(checkoutStore.cartData[0]?.productPrice)).toFixed(2) }} and recieve FREE GIFTS when
                             you subscribe. Plus, you can easily pause, skip or cancel your subscription any time!
                         </p>
+
                     </div>
                 </div>
             </div>

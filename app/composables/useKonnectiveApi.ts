@@ -120,6 +120,7 @@ export const queryCampaign = async () => {
 
     // Gift Products
     const giftProducts = structuredProducts.filter(product => config.giftItems.includes(product.productId));
+
     // Subscription Products
     const subProducts = structuredProducts.filter(product => config.subBags.includes(product.productId));
 
@@ -302,17 +303,17 @@ export const confirmPaypal = async () => {
     const ba_token = route.query.ba_token;
     const payerID = route.query.PayerID;
     if (!payerID && !ba_token) return;
-    // const checkoutStore = useCheckoutStore();
+    const checkoutStore = useCheckoutStore();
     const config = env();
     const sessionId = await getFromStorage('sessionId', "session");
     const vipOptIn = await getFromStorage('sub', 'session'); // need to track this
     const paypalBillerId = config.paypalBillerId;
     const params: any = { sessionId, paypalBillerId };
     params.campaignId = config.campaignId;
-    // Need to confogure shipping correctly
-    params.shipProfileId = config.shipProfiles[0];
     if (vipOptIn) {
-        params.shipProfileId = config.shipProfiles[1];
+        params.shipProfileId = checkoutStore.isShipping() ? config.shipProfiles[0] : config.shipProfiles[1];
+    } else {
+        params.shipProfileId = config.shipProfiles[0];
     }
     params.token = token;
     params.payerId = payerID;
@@ -350,10 +351,8 @@ export const confirmPaypal = async () => {
         saveToStorage('tax', response.message.taxTotal, 'session');
         saveToStorage('cartTotal', response.message.totalAmount, 'session');
         saveToStorage('orderId', response.message.orderId, 'session');
-
         // add puchased items in session to use on thankyou page
         saveToStorage('productReceipt', { subTotal: response.message.subTotal, shipping: response.message.shipTotal, tax: response.message.taxTotal, total: response.message.totalAmount, items: mapppedData }, 'session');
-        
         // checkoutStore.setStepCompleted(1);
         // checkoutStore.updateConfirmPaypalLoading(false);
         await router.push({ path: '/upsell1', state: { from: 'importorder' } });
@@ -362,6 +361,7 @@ export const confirmPaypal = async () => {
     if (response.result === "ERROR") {
         const formStore = useFormStore();
         formStore.apiErrorAlert = { status: true, message: response.message };
+        cleanStorage();
         // checkoutStore.updateAlert(true, response.message);
         // checkoutStore.updateConfirmPaypalLoading(false);
         return false;

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { cardExpiryMonths, getCardExpiryYears, gummyBagsSelector, gymmyTypeData, slides } from '~/assets/data/checkout';
-import GiftItemsSkeleton from '~/components/skeleton/GiftItemsSkeleton.vue';
 import { checkSteps } from '~/composables/checkSteps';
-import { fbCAPI, fbCAPIAPI } from '~/composables/common';
+import { extractAddressComponents, fbCAPI } from '~/composables/common';
 import { useOrderDataLayer } from '~/composables/useGtm.client';
-import { confirmPaypal, importClick, queryCampaign } from '~/composables/useKonnectiveApi';
-import { Faq, Footer, GiftItems, Header, Reviews, Tabs } from '~/utils';
+import { importClick, queryCampaign } from '~/composables/useKonnectiveApi';
+import { Faq, Footer, GiftItems, Header, Reviews, Tabs, HeroTitle, FormInput, GiftItemsSkeleton } from '~/utils';
 import { useCheckoutStore, useFormStore } from '../../stores/index';
 
 // checking which checkout 
@@ -25,12 +24,7 @@ const checkoutStore = useCheckoutStore();
 checkoutStore.setPageType('checkoutPage');
 
 // meta tag details
-useHead({
-    title: "Secure Checkout | Yumzy",
-    meta: [
-        { name: 'description', content: "Complete your Yumzy order securely." },
-    ],
-})
+metaData("Secure Checkout | Yumzy", "Complete your Yumzy order securely.")
 
 // Use computed to sync with store's paymentMethod
 const paymentMethod = computed({
@@ -39,6 +33,9 @@ const paymentMethod = computed({
         formStore.paymentMethod = value
     }
 });
+
+// Selected Country
+const selectedCountry = computed(() => formStore.formFields.shipCountry || 'US');
 
 // Gummy bags
 const selectedBag = ref(3);
@@ -53,24 +50,8 @@ const phonePlaceholder = computed(() =>
         : 'Phone number for tracking information'
 )
 
-// Selected Country
-const selectedCountry = computed(() => formStore.formFields.shipCountry || 'US');
-
-// carousel slider
-const activeSlide = ref(0)
-const currentSlide = computed(() => slides[activeSlide.value])
-
-const next = () => {
-    activeSlide.value = (activeSlide.value + 1) % slides.length
-}
-
-const prev = () => {
-    activeSlide.value = (activeSlide.value - 1 + slides.length) % slides.length
-}
-
-const goTo = (index: number) => {
-    activeSlide.value = index
-}
+// showing terms & condition text dynamically
+const { termsHtml } = useTerms()
 
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
@@ -96,27 +77,6 @@ watch(() => formFields.expiryMonth, (selectedMonth) => {
         formFields.expiryYear = '';
     }
 });
-
-// timer funtionality
-const minutes = ref(10)
-const seconds = ref(0)
-
-let countdownInterval: ReturnType<typeof setInterval> | null = null
-
-function startCountdown() {
-    countdownInterval = setInterval(() => {
-        if (seconds.value === 0) {
-            if (minutes.value === 0) {
-                if (countdownInterval) clearInterval(countdownInterval)
-                return
-            }
-            minutes.value--
-            seconds.value = 59
-        } else {
-            seconds.value--
-        }
-    }, 1000)
-}
 
 // Add data in Cart
 const addProductData = (id: number) => {
@@ -147,9 +107,6 @@ const calculateComparePrice = () => {
         shipping = shipProfile[0]?.shipPrice || 0;
     } else return (0).toFixed(2);
 
-    // console.log('subtotal:', subtotal);
-    // console.log('shipping:', shipping);
-
     return (subtotal + Number(shipping)).toFixed(2);
 };
 
@@ -171,21 +128,41 @@ const switchGummyType = (type: string) => {
     checkoutStore.addGummyProduct();
 };
 
-// showing the dynatotal price 
-const termsHtml = computed(() => {
-    const price = checkoutStore.calculateTotalPrice.toFixed(2)
-    const terms = termsAndCondition(price)
+// Address auto complete
+const initAutocomplete = () => {
+    const google = (window as any).google;
+    if (!google?.maps?.places) {
+        console.error("Google Maps API is not loaded.")
+        return
+    }
 
-    return checkoutStore.activeTab !== 'subscribe'
-        ? terms[1]
-        : terms[0]
-})
+    const input = document.querySelector('#shipStreetAddress') as HTMLInputElement
+    if (!input) return
+
+    // Prevent Enter key from submitting the form while selecting address
+    input.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter') e.preventDefault()
+    })
+
+    // const autocomplete = new google.maps.places.Autocomplete(input)
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['address'],
+        componentRestrictions: {
+            country: ['us', 'ca']
+        }
+    })
+
+    autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+
+        if (place?.address_components) {
+            extractAddressComponents(place.address_components)
+        }
+    })
+};
 
 // On Mount
 onMounted(async () => {
-
-    // Config env
-    const config = env();
 
     // check stetps affter successfull order
     checkSteps()
@@ -213,14 +190,14 @@ onMounted(async () => {
     update()
     window.addEventListener('resize', update)
 
-    startCountdown() // timer runs
-
     // Import Click
     await importClick();
 
     // Add insaurance 
     checkoutStore.addExtraProduct();
-    // console.log("checkoutStore.cartData", checkoutStore.cartData);
+
+    // Initialize on component mount
+    initAutocomplete();
 
     // Facebook CAPI & GTM DataLayer - InitiateCheckout event
     setTimeout(() => {
@@ -230,15 +207,6 @@ onMounted(async () => {
     }, 1000);
 
 })
-
-watch(paymentMethod, (newValue) => {
-    console.log('selected payment method:', newValue);
-});
-
-watch(checkoutStore.cartData, (newCartData) => {
-    // console.log('newCartData:', newCartData)
-})
-
 </script>
 
 <template>
@@ -253,40 +221,9 @@ watch(checkoutStore.cartData, (newCartData) => {
             <div class="max-w-[1200px] bg-white mx-auto grid grid-cols-1 md:grid-cols-[45%_55%] gap-8 items-center  
             lg:p-6 p-3 px-3 md:px-3 lg:px-8 border-[3px] lg:border-dashed border-solid border-[#000]">
 
-                <!-- Left: Image & Reasons -->
+                <!-- Left: Product Carausel -->
                 <div class="flex flex-col items-center md:items-start text-center md:text-left">
-                    <div x-data="carousel()" class="w-full max-w-4xl space-y-4">
-
-                        <!-- Main Image -->
-                        <div class="relative overflow-hidden rounded-xl shadow-lg">
-                            <NuxtImg :src="currentSlide" width="509" height="auto" alt="Carousel Image"
-                                class="w-full object-cover transition duration-500 md:max-h-[477px]" />
-
-                            <!-- Prev Button -->
-                            <button @click="prev"
-                                class="absolute text-4xl w-15 h-15 top-1/2 left-3 -translate-y-1/2 p-2 rounded-full shadow ">
-                                &#10094;
-                            </button>
-
-                            <!-- Next Button -->
-                            <button @click="next"
-                                class="absolute w-15 text-4xl h-15 top-1/2 right-3 -translate-y-1/2 p-2 rounded-full shadow ">
-                                &#10095;
-                            </button>
-                        </div>
-
-                        <!-- Thumbnails -->
-                        <div class="flex justify-center space-x-2">
-                            <template v-for="(slide, index) in slides" :key="index">
-                                <NuxtImg width="72" height="72" :src="slide" @click="goTo(index)" :class="activeSlide === index
-                                    ? 'ring-2 ring-blue-500 opacity-100'
-                                    : 'opacity-60 hover:opacity-100'"
-                                    class="w-12 h-12 lg:w-20 lg:h-20 object-cover rounded cursor-pointer transition p-1 overflow-hidden"
-                                    alt="carousel-thumbails" />
-                            </template>
-                        </div>
-                    </div>
-
+                    <ProductCarousel :slides="slides" />
                 </div>
 
                 <!-- Right: Text Content -->
@@ -311,20 +248,8 @@ watch(checkoutStore.cartData, (newCartData) => {
             </div>
         </section>
 
-        <!-- Timer -->
-        <section class="w-full lg:py-5 lg:p-2 py-2 p-0">
-            <div
-                class="max-w-[1200px] flex bg-yellow-200 border border-yellow-300 rounded-md lg:px-4 px-2  py-2 lg:py-6 items-center justify-center text-sm sm:text-base text-gray-800 font-medium mx-2 lg:mx-auto">
-
-                <!-- Fire Icon -->
-                <NuxtImg src="/images/fire.svg" alt="Fire" class="w-8 h-8 sm:w-8 sm:h-8 mr-2 flex-shrink-0" />
-
-                <!-- Text -->
-                <p class="text-center text-lg extrablod">Hurry. We currently have your order reserved. But Yumzy is
-                    selling like hotcakes, and we anticipate selling out soon.
-                </p>
-            </div>
-        </section>
+        <!-- Hero Title -->
+        <HeroTitle :img="heroTitle.section.imgPath" :text="heroTitle.section.text" />
 
         <div class="max-w-[1200px] mx-auto px-0 py-2 grid grid-cols-1 md:grid-cols-2 gap-1 lg:gap-8">
 
@@ -358,7 +283,7 @@ watch(checkoutStore.cartData, (newCartData) => {
                         class="flex flex-wrap flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-2 lg:space-x-6 mb-8">
                         <div v-for="value in gymmyTypeData" :key="value.id"
                             class="flex items-center space-x-1 cursor-pointer relative select-none mb-4 lg:mb-0 last:mb-0"
-                            @click="() => switchGummyType(value.id)">
+                            @click="switchGummyType(value.id)">
                             <div class="w-6 h-6 border-2 shrink-0 rounded-full flex items-center justify-center ml-3 border-[#172969]"
                                 :class="{ 'bg-[#172969]': checkoutStore.selectedGummyType === value.id }">
                                 <NuxtImg v-if="checkoutStore.selectedGummyType === value.id" src="/images/whiteTick.svg"
@@ -437,7 +362,6 @@ watch(checkoutStore.cartData, (newCartData) => {
                 </div>
 
                 <!-- STEP 4: PAYMENT METHOD -->
-                <!-- <div class="bg-white px-4 py-4 lg:py-0 lg:pt-4 rounded-lg shadow lg:m-0 m-2 hidden"> -->
                 <div class="bg-white px-4 py-4 lg:py-0 lg:pt-4 rounded-lg shadow lg:m-0 m-2">
                     <h2 class="text-lg font-bold border-b border-[#e7e7e7] pb-4 uppercase">
                         STEP 4: PAYMENT METHOD
@@ -478,11 +402,9 @@ watch(checkoutStore.cartData, (newCartData) => {
                 </div>
 
                 <section v-if="paymentMethod === 'creditCard' || paymentMethod === 'payPal'" class="lg:m-0 m-2">
-
                     <form @submit.prevent="() => formSubmit()">
 
                         <!-- STEP 5: CONTACT INFORMATION -->
-                        <!-- <div class="bg-white p-4 rounded-lg shadow mt-3 hidden"> -->
                         <div class="bg-white p-4 rounded-lg shadow mt-3">
                             <h2 class="text-lg font-bold border-b border-[#e7e7e7] pb-4 mb-1 uppercase">
                                 STEP 5: CONTACT INFORMATION
@@ -490,49 +412,25 @@ watch(checkoutStore.cartData, (newCartData) => {
 
                             <div class="bg-white pt-4">
                                 <div class="space-y-4">
-
-                                    <!-- First Name -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <input v-model="formFields.shipFirstName" name="shipFirstName" type="text"
-                                                @input="validateField('shipFirstName', ($event.target as HTMLInputElement).value)"
-                                                placeholder="First Name" :class="[
-                                                    'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.shipFirstName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
-                                                ]" maxlength="16" />
-                                            <p v-if="errors.shipFirstName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.shipFirstName }}
-                                            </p>
-                                        </div>
+
+                                        <!-- First Name -->
+                                        <FormInput v-model="formFields.shipFirstName" name="shipFirstName" :maxlength=16
+                                            placeholder="First Name" :error="errors.shipFirstName"
+                                            @input="validateField('shipFirstName', $event)" />
 
                                         <!-- Last Name -->
-                                        <div>
-                                            <input v-model="formFields.shipLastName" name="shipLastName" type="text"
-                                                @input="validateField('shipLastName', ($event.target as HTMLInputElement).value)"
-                                                placeholder="Last Name" :class="[
-                                                    'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.shipLastName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
-                                                ]" maxlength="16" />
-                                            <p v-if="errors.shipLastName" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.shipLastName }}
-                                            </p>
-                                        </div>
-
+                                        <FormInput v-model="formFields.shipLastName" name="shipLastName" :maxlength=16
+                                            placeholder="Last Name" :error="errors.shipLastName"
+                                            @input="validateField('shipLastName', $event)" />
                                     </div>
 
                                     <!-- Email -->
-                                    <input v-model="formFields.email" name="email-address" type="email"
-                                        placeholder="E-mail for order confirmation"
-                                        @input="validateField('email', ($event.target as HTMLInputElement).value)"
-                                        :class="[
-                                            'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                            errors.email ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                        maxlength="70" />
-                                    <p v-if="errors.email" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                        {{ errors.email }}
-                                    </p>
+                                    <FormInput v-model="formFields.email" name="email-address" type="email"
+                                        :maxlength=70 placeholder="E-mail for order confirmation" :error="errors.email"
+                                        @input="validateField('email', $event)" />
 
-                                    <!-- Phone -->
+                                    <!-- Phone Number -->
                                     <div class="flex items-center justify-center gap-2 lg:gap-4 w-full mt-4 m-0">
                                         <div
                                             class="flex justify-center items-center gap-1 bg-white shadow-md lg:px-4 px-3 rounded-md h-[58px]">
@@ -543,17 +441,11 @@ watch(checkoutStore.cartData, (newCartData) => {
                                             <p class="text-gray font-bold">+1</p>
                                         </div>
 
-                                        <input v-model="formFields.phoneNumber" name="phoneNumber" type="tel"
-                                            @input="validateField('phoneNumber', ($event.target as HTMLInputElement).value)"
-                                            :placeholder="phonePlaceholder"
-                                            :class="[
-                                                'w-full mb-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                errors.phoneNumber ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="10" />
-                                    </div>
-                                    <p v-if="errors.phoneNumber" class="ml-22 md:ml-25 mt-1 text-sm text-[#e6193c]">
-                                        {{ errors.phoneNumber }}
-                                    </p>
+                                        <FormInput class="w-full" v-model="formFields.phoneNumber" name="phoneNumber"
+                                            type="tel" :maxlength=10 :placeholder="phonePlaceholder"
+                                            :error="errors.phoneNumber" @input="validateField('phoneNumber', $event)" />
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -568,37 +460,21 @@ watch(checkoutStore.cartData, (newCartData) => {
                             <div class="space-y-4">
 
                                 <!-- Shipping - Street Address -->
-                                <input v-model="formFields.shipStreetAddress" name="shipStreetAddress" type="text"
-                                    @input="validateField('shipStreetAddress', ($event.target as HTMLInputElement).value)"
-                                    placeholder="Street Address"
-                                    :class="[
-                                        'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                        errors.shipStreetAddress ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                    maxlength="51" />
-                                <p v-if="errors.shipStreetAddress" class="ml-2 mt-1 mb-0 text-sm text-[#e6193c]">
-                                    {{ errors.shipStreetAddress }}
-                                </p>
+                                <FormInput id="shipStreetAddress" class="mb-0" v-model="formFields.shipStreetAddress"
+                                    name="shipStreetAddress" type="text" :maxlength=51 placeholder="Street Address"
+                                    :error="errors.shipStreetAddress" v-on:focus="initAutocomplete"
+                                    @input="validateField('shipStreetAddress', $event)" />
 
-                                <!-- Shipping -  Apartment or Suite (Optional) -->
-                                <input v-model="formFields.shipApptsAddress" name="shipApptsAddress" type="text"
-                                    placeholder="Apartment or Suite (Optional)"
-                                    :class="[
-                                        'w-full mb-4 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                        errors.shipApptsAddress ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="51" />
-                                <p v-if="errors.shipApptsAddress" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                    {{ errors.shipApptsAddress }}
-                                </p>
+                                <!-- Shipping - Apartment or Suite (Optional) -->
+                                <FormInput class="mb-4 mt-4" v-model="formFields.shipApptsAddress"
+                                    name="shipApptsAddress" :maxlength=51 placeholder="Apartment or Suite (Optional)"
+                                    :error="errors.shipApptsAddress"
+                                    @input="validateField('shipApptsAddress', $event)" />
 
                                 <!-- Shipping - City -->
-                                <input v-model="formFields.shipCity" name="shipCity" type="text" placeholder="City"
-                                    @input="validateField('shipCity', ($event.target as HTMLInputElement).value)"
-                                    :class="[
-                                        'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                        errors.shipCity ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                    maxlength="16" />
-                                <p v-if="errors.shipCity" class="ml-2 mt-1 mb-0 text-sm text-[#e6193c]">
-                                    {{ errors.shipCity }}
-                                </p>
+                                <FormInput class="m-0" v-model="formFields.shipCity" name="shipCity" :maxlength=16
+                                    placeholder="City" :error="errors.shipCity"
+                                    @input="validateField('shipCity', $event)" />
 
                                 <!-- Shipping - Country -->
                                 <select v-model="formFields.shipCountry" name="shipCountry" @change="
@@ -635,79 +511,43 @@ watch(checkoutStore.cartData, (newCartData) => {
                                     </div>
 
                                     <!--  Shipping - Postal Code -->
-                                    <div>
-                                        <input v-model="formFields.shipPostalCode" name="shipPostalCode" type="text"
-                                            @input="validateField('shipPostalCode', ($event.target as HTMLInputElement).value)"
-                                            placeholder="Postal Code"
-                                            :class="[
-                                                'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                errors.shipPostalCode ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']"
-                                            maxlength="11" />
-                                        <p v-if="errors.shipPostalCode" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                            {{ errors.shipPostalCode }}
-                                        </p>
-                                    </div>
+                                    <FormInput class="m-0" v-model="formFields.shipPostalCode" name="shipPostalCode"
+                                        :maxlength=11 placeholder="Postal Code" :error="errors.shipPostalCode"
+                                        @input="validateField('shipPostalCode', $event)" />
                                 </div>
 
                                 <!-- Credit Card Number -->
-                                <input v-model="formFields.creditCardNumber" name="creditCardNumber" type="text"
-                                    @input="validateField('creditCardNumber', ($event.target as HTMLInputElement).value)"
-                                    placeholder="Credit Card Number"
-                                    :class="[
-                                        'w-full m-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                        errors.creditCardNumber ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="16">
-                                <p v-if="errors.creditCardNumber" class="ml-2 mt-1 mb-0 text-sm text-[#e6193c]">
-                                    {{ errors.creditCardNumber }}
-                                </p>
+                                <FormInput class="m-0 mt-4" v-model="formFields.creditCardNumber"
+                                    name="creditCardNumber" :maxlength=16 placeholder="Credit Card Number"
+                                    :error="errors.creditCardNumber"
+                                    @input="validateField('creditCardNumber', $event)" />
 
                                 <!-- Security Code (3-4 Digits) -->
-                                <input v-model="formFields.cardCVV" name="cardCVV" type="text"
-                                    @input="validateField('cardCVV', ($event.target as HTMLInputElement).value)"
-                                    placeholder="Security Code (3-4 Digits)"
-                                    :class="[
-                                        'w-full m-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+                                <FormInput class="m-0 mt-4" v-model="formFields.cardCVV" name="cardCVV"
+                                    placeholder="Security Code (3-4 Digits)" :maxlength=4 :error="errors.cardCVV"
+                                    @input="validateField('cardCVV', $event)" />
 
-                                        errors.cardCVV ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']" maxlength="4" />
-                                <p v-if="errors.cardCVV" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                    {{ errors.cardCVV }}
-                                </p>
-
-                                <!-- Card Expiry Month -->
                                 <div class="mb-0 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <select v-model="formFields.expiryMonth" name="expiryMonth"
-                                            @input="validateField('expiryMonth', ($event.target as HTMLInputElement).value)"
-                                            :class="[
-                                                'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                errors.expiryMonth ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                            <option value="">Card Month</option>
-                                            <option v-for="month in cardExpiryMonths" :key=month.code :value=month.code>
-                                                {{ month.name }}
-                                            </option>
-                                        </select>
-                                        <p v-if="errors.expiryMonth" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                            {{ errors.expiryMonth }}
-                                        </p>
-                                    </div>
+                                    <!-- Card Expiry Month -->
+                                    <FormSelect v-model="formFields.expiryMonth" name="expiryMonth"
+                                        :error="errors.expiryMonth" @change="validateField('expiryMonth', $event)">
+                                        <option value="">Card Month</option>
+
+                                        <option v-for="month in cardExpiryMonths" :key="month.code" :value="month.code">
+                                            {{ month.name }}
+                                        </option>
+                                    </FormSelect>
 
                                     <!-- Card Expiry Year -->
-                                    <div>
-                                        <select v-model="formFields.expiryYear" name="expiryYear"
-                                            @input="validateField('expiryYear', ($event.target as HTMLInputElement).value)"
-                                            :class="[
-                                                'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                errors.expiryYear ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                            <option value="">Expiry Year</option>
-                                            <option v-for="year in cardExpiryYears" :key="year.value" :value=year.value>
-                                                {{ year.name }}
-                                            </option>
-                                        </select>
-                                        <p v-if="errors.expiryYear" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                            {{ errors.expiryYear }}
-                                        </p>
-                                    </div>
-                                </div>
+                                    <FormSelect v-model="formFields.expiryYear" name="expiryYear"
+                                        :error="errors.expiryYear" @change="validateField('expiryYear', $event)">
+                                        <option value="">Expiry Year</option>
 
+                                        <option v-for="year in cardExpiryYears" :key="year.value" :value="year.value">
+                                            {{ year.name }}
+                                        </option>
+                                    </FormSelect>
+                                </div>
                             </div>
                         </div>
 
@@ -747,70 +587,35 @@ watch(checkoutStore.cartData, (newCartData) => {
 
                             <Transition name="sameName">
                                 <div v-if="!formStore.sameBilling" class="space-y-4 mt-5">
-                                    <!-- Billing - First Name -->
+
                                     <div class="mb-0 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <input v-model="formFields.billingFirstName" name="billingFirstName"
-                                                type="text"
-                                                @input="validateField('billingFirstName', ($event.target as HTMLInputElement).value)"
-                                                placeholder="First Name" maxlength="12"
-                                                :class="[
-                                                    'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.billingFirstName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                            <span v-if="errors.billingFirstName"
-                                                class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.billingFirstName }}
-                                            </span>
-                                        </div>
+                                        <!-- Billing - First Name -->
+                                        <FormInput v-model="formFields.billingFirstName" name="billingFirstName"
+                                            :maxlength=16 placeholder="First Name" :error="errors.billingFirstName"
+                                            @input="validateField('billingFirstName', $event)" />
 
                                         <!-- Billing - Last Name -->
-                                        <div>
-                                            <input v-model="formFields.billingLastName" name="billingLastName"
-                                                type="text"
-                                                @input="validateField('billingLastName', ($event.target as HTMLInputElement).value)"
-                                                placeholder="Last Name" maxlength="12"
-                                                :class="[
-                                                    'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.billingLastName ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                            <span v-if="errors.billingLastName"
-                                                class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.billingLastName }}
-                                            </span>
-                                        </div>
+                                        <FormInput v-model="formFields.billingLastName" name="billingLastName"
+                                            :maxlength=16 placeholder="Last Name"
+                                            @input="validateField('billingLastName', $event)" />
                                     </div>
 
                                     <!-- Billing - Street Address -->
-                                    <input v-model="formFields.billingStreetAddress" name="billingStreetAddress"
-                                        type="text"
-                                        @input="validateField('billingStreetAddress', ($event.target as HTMLInputElement).value)"
-                                        placeholder="Street Address" maxlength="50"
-                                        :class="[
-                                            'w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                            errors.billingStreetAddress ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                    <span v-if="errors.billingStreetAddress" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                        {{ errors.billingStreetAddress }}
-                                    </span>
+                                    <FormInput class="mb-0 mt-4" v-model="formFields.billingStreetAddress"
+                                        name="billingStreetAddress" :maxlength=16 placeholder="Street Address"
+                                        :error="errors.billingStreetAddress"
+                                        @input="validateField('billingStreetAddress', $event)" />
 
                                     <!-- Billing - Apartment or Suite (Optional) -->
-                                    <input v-model="formFields.billingApptsAddress" name="billingApptsAddress"
-                                        type="text" placeholder="Apartment or Suite (Optional)" maxlength="50"
-                                        :class="[
-                                            'w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                            errors.billingApptsAddress ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                    <span v-if="errors.billingApptsAddress" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                        {{ errors.billingApptsAddress }}
-                                    </span>
+                                    <FormInput class="mb-0 mt-4" v-model="formFields.billingApptsAddress"
+                                        name="billingApptsAddress" :maxlength=50
+                                        placeholder="Apartment or Suite (Optional)" :error="errors.billingApptsAddress"
+                                        @input="validateField('billingApptsAddress', $event)" />
 
                                     <!-- Billing - City -->
-                                    <input v-model="formFields.billingCity" name="billingCity" type="text"
-                                        @input="validateField('billingCity', ($event.target as HTMLInputElement).value)"
-                                        placeholder="City" maxlength="20"
-                                        :class="[
-                                            'w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                            errors.billingCity ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                    <span v-if="errors.billingCity" class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                        {{ errors.billingCity }}
-                                    </span>
+                                    <FormInput class="mb-0 mt-4" v-model="formFields.billingCity" name="billingCity"
+                                        :maxlength=20 placeholder="City" :error="errors.billingCity"
+                                        @input="validateField('billingCity', $event)" />
 
                                     <!-- Billing - Country -->
                                     <select v-model="formFields.billingCounty" name="billingCounty"
@@ -846,18 +651,10 @@ watch(checkoutStore.cartData, (newCartData) => {
                                         </div>
 
                                         <!-- Billing - Postal Code -->
-                                        <div>
-                                            <input v-model="formFields.billingPostalCode" name="billingPostalCode"
-                                                @input="validateField('billingPostalCode', ($event.target as HTMLInputElement).value)"
-                                                type="text" placeholder="Postal Code" maxlength="9"
-                                                :class="[
-                                                    'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
-                                                    errors.billingPostalCode ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
-                                            <span v-if="errors.billingPostalCode"
-                                                class="ml-2 mt-1 text-sm text-[#e6193c]">
-                                                {{ errors.billingPostalCode }}
-                                            </span>
-                                        </div>
+                                        <FormInput class="mb-0" v-model="formFields.billingPostalCode"
+                                            name="billingPostalCode" :maxlength=9 placeholder="Postal Code"
+                                            :error="errors.billingPostalCode"
+                                            @input="validateField('billingPostalCode', $event)" />
 
                                     </div>
                                 </div>
@@ -1030,8 +827,8 @@ watch(checkoutStore.cartData, (newCartData) => {
 
                                 <!-- Loader -->
                                 <div name="loader" v-if="formStore.transactionStatus"
-                                    :class="['w-full flex justify-center items-center rounded-lg cursor-pointer text-pixel', paymentMethod === 'creditCard' ? 'bg-[#1ab22c] hover:bg-[#169924]' : 'bg-yellow-500 hover:bg-yellow-600']">
-                                    <NuxtImg class="w-12 h-12 my-1" src="/images/loader.svg" alt="loader.svg" />
+                                    :class="['w-full flex justify-center items-center rounded-lg cursor-pointer text-pixel', paymentMethod === 'creditCard' ? 'bg-[#1ab22c] hover:bg-[#169924] py-1' : 'bg-yellow-500 hover:bg-yellow-600']">
+                                    <NuxtImg class="w-12 h-12 my-1" src="/images/loader.svg" alt="loader.svg" preload />
                                 </div>
 
                                 <p v-if="formStore.hasEmptyFields && formStore.hasAttemptedSubmit"

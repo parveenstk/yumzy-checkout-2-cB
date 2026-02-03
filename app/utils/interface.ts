@@ -155,3 +155,10 @@ export interface ProductReceiptSessionItems {
     variant_id: string;
     variant_title: string;
 };
+
+// For Google Address Autocomplete
+export interface AddressComponent {
+    long_name: string;
+    short_name: string;
+    types: string[];
+}

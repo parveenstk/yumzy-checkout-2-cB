@@ -70,6 +70,9 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
             (product) => product.productId === selectedQuantity.value
         );
 
+        // console.log("selectedQuantity.value:", selectedQuantity.value);
+        // console.log("selectedProduct?.productId:", selectedProduct?.productId);
+
         if (!selectedProduct) {
             console.warn('Product not found');
             return;
@@ -218,6 +221,17 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
         return Math.ceil(percentageOff)
     }
 
+    // Tracking shipping behalf of 1-bag productId
+    const isShipping = () => {
+        const checkoutStore = useCheckoutStore();
+        const config = env();
+
+        return checkoutStore.cartData.some(
+            (product) =>
+                product.productId === config.ogBags[0] || product.productId === config.ogBagsSub[0] || product.productId === config.sourBags[0] || product.productId === config.sourBagsSub[0]
+        );
+    };
+
     return {
         allProducts,
         saveProducts,
@@ -250,5 +264,6 @@ export const useCheckoutStore = defineStore('checkoutStore', () => {
         setPageType,
         transactionStatus,
         setTransactionStatus,
+        isShipping
     }
 });
