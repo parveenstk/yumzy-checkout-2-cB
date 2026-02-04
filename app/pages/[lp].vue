@@ -652,7 +652,7 @@ onMounted(async () => {
 
                                         <!-- Billing - Postal Code -->
                                         <FormInput class="mb-0" v-model="formFields.billingPostalCode"
-                                            name="billingPostalCode" :maxlength=9 placeholder="Postal Code"
+                                            name="billingPostalCode" :maxlength=11 placeholder="Postal Code"
                                             :error="errors.billingPostalCode"
                                             @input="validateField('billingPostalCode', $event)" />
 

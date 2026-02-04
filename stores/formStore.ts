@@ -88,7 +88,7 @@ export const useFormStore = defineStore('formStore', () => {
     const nameRegex = /^[A-Za-zÀ-ÿ\-'\s]{2,15}$/
     const cityRegex = /^[A-Za-zÀ-ÿ\s\-]{2,15}$/
     const stateRegex = /^[A-Z]{2}$/
-    const postalCodeRegex = /^[A-Za-z0-9]{5,10}$/
+    const postalCodeRegex = /^[A-Za-z0-9\s]{3,10}$/
     const phoneRegex = /^\+?[0-9\s\-]{10,15}$/
     const streetRegex = /^[A-Za-z0-9À-ÿ\s,'\-\.]{5,100}$/
 
@@ -152,9 +152,9 @@ export const useFormStore = defineStore('formStore', () => {
         shipPostalCode: z.string()
             .trim()
             .nonempty('This field is required')
-            .min(5, 'Postal code must be at least 5 characters')
+            .min(3, 'Postal code must be at least 3 characters')
             .max(10, 'Postal code must be at most 10 characters')
-            .regex(postalCodeRegex, 'Postal code must be between 5 and 10 characters (letters and numbers only)'),
+            .regex(postalCodeRegex, 'Postal code must contain only letters, numbers, and spaces'),
 
         // Credit card
         creditCardNumber: z.string()
@@ -187,10 +187,11 @@ export const useFormStore = defineStore('formStore', () => {
         billingCounty: z.string().regex(cityRegex, 'Invalid county'),
         billingState: z.string().regex(stateRegex, 'Invalid state'),
         billingPostalCode: z.string()
+            .trim()
             .nonempty('This field is required')
-            .min(5, 'Postal code must be at least 5 digits.')
-            .max(10, 'Postal code must be at most 10 digits.')
-            .regex(postalCodeRegex, 'Postal code must be between 5 and 10 digits'),
+            .min(3, 'Postal code must be at least 3 characters')
+            .max(10, 'Postal code must be at most 10 characters')
+            .regex(postalCodeRegex, 'Postal code must contain only letters, numbers, and spaces'),
     });
 
     // Computed schema based on payment method
