@@ -27,6 +27,27 @@ export const useFormStore = defineStore('formStore', () => {
     // check on submit required fields
     const hasAttemptedSubmit = ref(false);
 
+    // Any error on input fields
+    const hasAnyError = computed(() => {
+        return Object.values(errors).some(Boolean);
+    });
+
+    // global error message
+    const globalError = ref('');
+
+    // computed form message
+    const formMessage = computed(() => {
+        if (hasEmptyFields.value && hasAttemptedSubmit.value) {
+            return 'Please fill in the required fields above';
+        }
+
+        if (hasAnyError.value && hasAttemptedSubmit.value) {
+            return globalError.value || 'Please fix the highlighted fields above';
+        }
+
+        return '';
+    });
+
     // importOrder response
     const apiErrorAlert: Ref<{ status: boolean; message: string }> = ref({ status: false, message: "" })
 
@@ -101,8 +122,8 @@ export const useFormStore = defineStore('formStore', () => {
             .regex(nameRegex, 'Shipping first name contains only letters'),
         shipLastName: z.string()
             .nonempty('This field is required')
-            .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
+            .min(2, 'Shipping last name must be at least 2 characters')
+            .max(15, 'Shipping last name must be at most 15 characters')
             .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
@@ -269,6 +290,7 @@ export const useFormStore = defineStore('formStore', () => {
     const formSubmit = async () => {
         hasAttemptedSubmit.value = true;
         transactionStatus.value = true;
+        globalError.value = '';
 
         // Clear previous errors
         Object.keys(errors).forEach((key) => {
@@ -322,40 +344,26 @@ export const useFormStore = defineStore('formStore', () => {
 
         if (!result.success) {
             const zodError = result.error as ZodError
+            globalError.value = 'Please fix the highlighted fields above';
 
             zodError.issues.forEach((err) => {
-                const field = err.path[0]
+                const field = err.path[0];
                 if (typeof field === 'string') {
-                    errors[field] = err.message
+                    errors[field] = err.message;
                 }
             })
-            console.log('errors:', JSON.stringify(errors, null, 2));
-            // hasEmptyFields.value = true;
-            hasEmptyFields.value = false;
-            hasAttemptedSubmit.value = false;
+            // console.log('errors:', JSON.stringify(errors, null, 2));
+
             transactionStatus.value = false;
             return false;
         };
 
         await importLead();
         await importOrder();
-        // resetForm();
         transactionStatus.value = false;
         hasEmptyFields.value = false;
-        // console.log('Form is valid!')
         return true
     }
-
-    // Reset method
-    const resetForm = () => {
-        Object.keys(formFields).forEach((key) => {
-            formFields[key as keyof FormFields] = ''
-        });
-        paymentMethod.value = "creditCard"; // Reset payment method too 
-        hasEmptyFields.value = false;
-        hasAttemptedSubmit.value = false;
-        console.log("🗑️ : All fields are clean now.");
-    };
 
     // check validation on input
     const validateField = async <K extends keyof typeof formFields>(key: K, value: string) => {
@@ -376,9 +384,11 @@ export const useFormStore = defineStore('formStore', () => {
         try {
             fieldSchema.parse(value)
             errors[key as string] = '' // Clear previous error
+            globalError.value = '';
         } catch (err: any) {
             if (err instanceof z.ZodError) {
-                errors[key as string] = err.issues[0]?.message || 'Invalid input'
+                errors[key as string] = err.issues[0]?.message || 'Invalid input';
+                globalError.value = 'Please fix the highlighted fields above';
             }
         } finally {
             formFields[key] = value; // update form values
@@ -494,7 +504,9 @@ export const useFormStore = defineStore('formStore', () => {
         hasEmptyFields,
         hasAttemptedSubmit,
         apiErrorAlert,
-        resetForm,
-        handleError
+        handleError,
+        hasAnyError,
+        globalError,
+        formMessage
     }
 });

@@ -832,9 +832,9 @@ onMounted(async () => {
                                     <NuxtImg class="w-12 h-12 my-1" src="/images/loader.svg" alt="loader.svg" preload />
                                 </div>
 
-                                <p v-if="formStore.hasEmptyFields && formStore.hasAttemptedSubmit"
+                                <p v-if="formStore.formMessage"
                                     class="ml-2 mb-0 text-red-600 font-semibold text-center">
-                                    Please fill in the required fields above
+                                    {{ formStore.formMessage }}
                                 </p>
 
                                 <!-- Guarantee Section -->
