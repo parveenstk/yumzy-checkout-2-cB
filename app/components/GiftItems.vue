@@ -45,17 +45,28 @@ const isDimmed = (index) => {
 
 // Now: filter based on version
 const visibleItems = computed(() => {
+
+    // make a shallow copy so we don't mutate store directly
+    const items = [...checkoutStore.giftsProducts];
+
+    // swap index 2 and 3
+    if (items.length > 3) {
+        [items[2], items[3]] = [items[3], items[2]];
+    }
+
     if (props.version === 'second') {
-        const filteredGifts = checkoutStore.giftsProducts.filter((_, index) => !isDimmed(index));
+        const filteredGifts = items.filter((_, index) => !isDimmed(index));
+
         const filteredGiftIds = filteredGifts.map(pr => {
             if (config.giftItems.includes(pr.productId)) return pr.productId;
-            else return;
         });
-        checkoutStore.addGiftProducts(filteredGiftIds)
-        // console.log("filteredGiftIds", filteredGiftIds)
+
+        checkoutStore.addGiftProducts(filteredGiftIds);
+
         return filteredGifts;
     }
-    return checkoutStore.giftsProducts;
+
+    return items;
 });
 
 </script>
@@ -80,8 +91,7 @@ const visibleItems = computed(() => {
             </span>
 
             <span class="flex items-center gap-1 font-bold">
-                <del v-if="index === 3" class="text-[#474747]">$500</del>
-                <del v-else-if="index === 0" class="text-[#474747]">${{ item.compareAtPrice }}+</del>
+                <del v-if="index === 0" class="text-[#474747]">${{ item.compareAtPrice }}+</del>
                 <del v-else class="text-[#474747]">${{ item.compareAtPrice }}</del>
                 <span>${{ item.productPrice }}</span>
             </span>
