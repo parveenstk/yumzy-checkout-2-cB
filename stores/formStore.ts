@@ -106,24 +106,24 @@ export const useFormStore = defineStore('formStore', () => {
     }, { deep: true });
 
     // Zod schema
-    const nameRegex = /^[A-Za-zÀ-ÿ\-'\s]{2,15}$/
-    const cityRegex = /^[A-Za-zÀ-ÿ\s\-]{2,15}$/
+    const nameRegex = /^[A-Za-zÀ-ÿ\-'\s]{2,25}$/
+    const cityRegex = /^[A-Za-zÀ-ÿ\s\-]{2,30}$/
     const stateRegex = /^[A-Z]{2}$/
     const postalCodeRegex = /^[A-Za-z0-9\s]{3,10}$/
     const phoneRegex = /^\+?[0-9\s\-]{10,15}$/
-    const streetRegex = /^[A-Za-z0-9À-ÿ\s,'\-\.]{5,100}$/
+    const streetRegex = /^[A-Za-z0-9À-ÿ\s,'\-\.]{5,50}$/
 
     // Basic schema (always required for both payment methods)
     const basicSchema = z.object({
         shipFirstName: z.string()
             .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
+            .max(25, 'Shipping first name must be at most 25 characters')
             .regex(nameRegex, 'Shipping first name contains only letters'),
         shipLastName: z.string()
             .nonempty('This field is required')
             .min(2, 'Shipping last name must be at least 2 characters')
-            .max(15, 'Shipping last name must be at most 15 characters')
+            .max(25, 'Shipping last name must be at most 25 characters')
             .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
@@ -140,12 +140,12 @@ export const useFormStore = defineStore('formStore', () => {
         shipFirstName: z.string()
             .nonempty('This field is required')
             .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
+            .max(25, 'Shipping first name must be at most 25 characters')
             .regex(nameRegex, 'Shipping first name contains only letters'),
         shipLastName: z.string()
             .nonempty('This field is required')
-            .min(2, 'Shipping first name must be at least 2 characters')
-            .max(15, 'Shipping first name must be at most 15 characters')
+            .min(2, 'Shipping last name must be at least 2 characters')
+            .max(25, 'Shipping last name must be at most 25 characters')
             .regex(nameRegex, 'Shipping last name contains only letters'),
         email: z.email('Email format should be "name@example.com"')
             .nonempty('This field is required'),
@@ -159,7 +159,7 @@ export const useFormStore = defineStore('formStore', () => {
         shipStreetAddress: z.string()
             .nonempty('This field is required')
             .min(5, 'Street address must be at least 5 characters')
-            .max(100, 'Street address must be at most 100 characters')
+            .max(50, 'Street address must be at most 50 characters')
             .regex(streetRegex, 'Invalid street address'),
 
         shipApptsAddress: z.string().optional(),
@@ -197,7 +197,7 @@ export const useFormStore = defineStore('formStore', () => {
         billingStreetAddress: z.string()
             .nonempty('This field is required')
             .min(5, 'Street address must be at least 5 characters')
-            .max(100, 'Street address must be at most 100 characters')
+            .max(50, 'Street address must be at most 50 characters')
             .regex(streetRegex, 'Invalid street address'),
         billingApptsAddress: z.string().optional(),
         billingCity: z.string()

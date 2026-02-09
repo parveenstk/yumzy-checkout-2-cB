@@ -6,6 +6,7 @@ import { useOrderDataLayer } from '~/composables/useGtm.client';
 import { importClick, queryCampaign } from '~/composables/useKonnectiveApi';
 import { Faq, Footer, GiftItems, Header, Reviews, Tabs, HeroTitle, FormInput, GiftItemsSkeleton } from '~/utils';
 import { useCheckoutStore, useFormStore } from '../../stores/index';
+import { useTerms } from '~/composables/useTerms';
 
 // checking which checkout 
 definePageMeta({
@@ -427,7 +428,7 @@ onMounted(async () => {
 
                                     <!-- Email -->
                                     <FormInput v-model="formFields.email" name="email-address" type="email"
-                                        :maxlength=70 placeholder="E-mail for order confirmation" :error="errors.email"
+                                        :maxlength=50 placeholder="E-mail for order confirmation" :error="errors.email"
                                         @input="validateField('email', $event)" />
 
                                     <!-- Phone Number -->
@@ -442,7 +443,7 @@ onMounted(async () => {
                                         </div>
 
                                         <FormInput class="w-full" v-model="formFields.phoneNumber" name="phoneNumber"
-                                            type="tel" :maxlength=10 :placeholder="phonePlaceholder"
+                                            type="tel" :maxlength=16 :placeholder="phonePlaceholder"
                                             :error="errors.phoneNumber" @input="validateField('phoneNumber', $event)" />
 
                                     </div>
@@ -472,7 +473,7 @@ onMounted(async () => {
                                     @input="validateField('shipApptsAddress', $event)" />
 
                                 <!-- Shipping - City -->
-                                <FormInput class="m-0" v-model="formFields.shipCity" name="shipCity" :maxlength=16
+                                <FormInput class="m-0" v-model="formFields.shipCity" name="shipCity" :maxlength=31
                                     placeholder="City" :error="errors.shipCity"
                                     @input="validateField('shipCity', $event)" />
 
@@ -517,13 +518,13 @@ onMounted(async () => {
                                 </div>
 
                                 <!-- Credit Card Number -->
-                                <FormInput class="m-0 mt-4" v-model="formFields.creditCardNumber"
+                                <FormInput class="m-0 mt-4" v-model="formFields.creditCardNumber" type="tel"
                                     name="creditCardNumber" :maxlength=16 placeholder="Credit Card Number"
                                     :error="errors.creditCardNumber"
                                     @input="validateField('creditCardNumber', $event)" />
 
                                 <!-- Security Code (3-4 Digits) -->
-                                <FormInput class="m-0 mt-4" v-model="formFields.cardCVV" name="cardCVV"
+                                <FormInput class="m-0 mt-4" v-model="formFields.cardCVV" name="cardCVV" type="tel"
                                     placeholder="Security Code (3-4 Digits)" :maxlength=4 :error="errors.cardCVV"
                                     @input="validateField('cardCVV', $event)" />
 
@@ -614,7 +615,7 @@ onMounted(async () => {
 
                                     <!-- Billing - City -->
                                     <FormInput class="mb-0 mt-4" v-model="formFields.billingCity" name="billingCity"
-                                        :maxlength=20 placeholder="City" :error="errors.billingCity"
+                                        :maxlength=31 placeholder="City" :error="errors.billingCity"
                                         @input="validateField('billingCity', $event)" />
 
                                     <!-- Billing - Country -->
