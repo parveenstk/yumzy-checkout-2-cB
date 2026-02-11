@@ -191,7 +191,7 @@ export const useFormStore = defineStore('formStore', () => {
         billingFirstName: z.string()
             .nonempty('This field is required')
             .min(2, 'First name must be at least 2 characters')
-            .max(15, 'First name must be at most 15 characters')
+            .max(25, 'First name must be at most 25 characters')
             .regex(nameRegex, 'First name must contain only letters'),
         billingLastName: z.string().optional(),
         billingStreetAddress: z.string()

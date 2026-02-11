@@ -416,12 +416,12 @@ onMounted(async () => {
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                                         <!-- First Name -->
-                                        <FormInput v-model="formFields.shipFirstName" name="shipFirstName" :maxlength=16
+                                        <FormInput v-model="formFields.shipFirstName" name="shipFirstName" :maxlength=26
                                             placeholder="First Name" :error="errors.shipFirstName"
                                             @input="validateField('shipFirstName', $event)" />
 
                                         <!-- Last Name -->
-                                        <FormInput v-model="formFields.shipLastName" name="shipLastName" :maxlength=16
+                                        <FormInput v-model="formFields.shipLastName" name="shipLastName" :maxlength=26
                                             placeholder="Last Name" :error="errors.shipLastName"
                                             @input="validateField('shipLastName', $event)" />
                                     </div>
