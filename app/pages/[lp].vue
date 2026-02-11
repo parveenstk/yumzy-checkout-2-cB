@@ -592,7 +592,7 @@ onMounted(async () => {
                                     <div class="mb-0 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <!-- Billing - First Name -->
                                         <FormInput v-model="formFields.billingFirstName" name="billingFirstName"
-                                            :maxlength=16 placeholder="First Name" :error="errors.billingFirstName"
+                                            :maxlength=26 placeholder="First Name" :error="errors.billingFirstName"
                                             @input="validateField('billingFirstName', $event)" />
 
                                         <!-- Billing - Last Name -->
