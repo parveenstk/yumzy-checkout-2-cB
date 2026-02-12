@@ -462,7 +462,7 @@ onMounted(async () => {
 
                                 <!-- Shipping - Street Address -->
                                 <FormInput id="shipStreetAddress" class="mb-0" v-model="formFields.shipStreetAddress"
-                                    name="shipStreetAddress" type="text" :maxlength=51 placeholder="Street Address"
+                                    name="shipStreetAddress" type="text" :maxlength=101 placeholder="Street Address"
                                     :error="errors.shipStreetAddress" v-on:focus="initAutocomplete"
                                     @input="validateField('shipStreetAddress', $event)" />
 
@@ -603,7 +603,7 @@ onMounted(async () => {
 
                                     <!-- Billing - Street Address -->
                                     <FormInput class="mb-0 mt-4" v-model="formFields.billingStreetAddress"
-                                        name="billingStreetAddress" :maxlength=16 placeholder="Street Address"
+                                        name="billingStreetAddress" :maxlength=101 placeholder="Street Address"
                                         :error="errors.billingStreetAddress"
                                         @input="validateField('billingStreetAddress', $event)" />
 

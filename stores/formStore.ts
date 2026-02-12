@@ -111,7 +111,7 @@ export const useFormStore = defineStore('formStore', () => {
     const stateRegex = /^[A-Z]{2}$/
     const postalCodeRegex = /^[A-Za-z0-9\s]{3,10}$/
     const phoneRegex = /^\+?[0-9\s\-]{10,15}$/
-    const streetRegex = /^[A-Za-z0-9À-ÿ\s,'\-\.]{5,50}$/
+    const streetRegex = /^[A-Za-z0-9À-ÿ\s,'&#\/\-\.\(\)]{3,100}$/
 
     // Basic schema (always required for both payment methods)
     const basicSchema = z.object({
@@ -158,8 +158,8 @@ export const useFormStore = defineStore('formStore', () => {
         // Shipping Address
         shipStreetAddress: z.string()
             .nonempty('This field is required')
-            .min(5, 'Street address must be at least 5 characters')
-            .max(50, 'Street address must be at most 50 characters')
+            .min(3, 'Street address must be at least 3 characters')
+            .max(100, 'Street address must be at most 100 characters')
             .regex(streetRegex, 'Invalid street address'),
 
         shipApptsAddress: z.string().optional(),
@@ -196,8 +196,8 @@ export const useFormStore = defineStore('formStore', () => {
         billingLastName: z.string().optional(),
         billingStreetAddress: z.string()
             .nonempty('This field is required')
-            .min(5, 'Street address must be at least 5 characters')
-            .max(50, 'Street address must be at most 50 characters')
+            .min(3, 'Street address must be at least 3 characters')
+            .max(100, 'Street address must be at most 100 characters')
             .regex(streetRegex, 'Invalid street address'),
         billingApptsAddress: z.string().optional(),
         billingCity: z.string()
