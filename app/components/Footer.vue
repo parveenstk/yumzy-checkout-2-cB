@@ -4,9 +4,19 @@
         <!-- Links -->
         <div class="mb-2">
             <template v-for="(item, index) in footerContent.links" :key="index">
-                <button class="hover:text-gray-800 hover:underline cursor-pointer">
+
+                <!-- Internal Link -->
+                <NuxtLink v-if="item.url.startsWith('/')" :to="item.url"
+                    class="hover:text-gray-800 hover:underline cursor-pointer">
                     {{ item.label }}
-                </button>
+                </NuxtLink>
+
+                <!-- External Link -->
+                <a v-else :href="item.url" target="_blank" rel="noopener noreferrer"
+                    class="hover:text-gray-800 hover:underline cursor-pointer">
+                    {{ item.label }}
+                </a>
+
                 <span v-if="index < footerContent.links.length - 1"> | </span>
             </template>
         </div>

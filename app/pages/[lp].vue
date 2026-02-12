@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { cardExpiryMonths, getCardExpiryYears, gummyBagsSelector, gymmyTypeData, slides } from '~/assets/data/checkout';
 import { checkSteps } from '~/composables/checkSteps';
-import { extractAddressComponents, fbCAPI } from '~/composables/common';
-import { useOrderDataLayer } from '~/composables/useGtm.client';
+import { extractAddressComponents, trackAllEvent } from '~/composables/common';
 import { importClick, queryCampaign } from '~/composables/useKonnectiveApi';
 import { Faq, Footer, GiftItems, Header, Reviews, Tabs, HeroTitle, FormInput, GiftItemsSkeleton } from '~/utils';
 import { useCheckoutStore, useFormStore } from '../../stores/index';
@@ -90,9 +89,7 @@ const addProductData = (id: number) => {
 
     checkoutStore.selectedQuantity = variantId;
     checkoutStore.addGummyProduct();
-    fbCAPI("AddToCart");
-    fbCAPIAPI("AddToCart");
-    useOrderDataLayer("AddToCart");
+    trackAllEvent("AddToCart")
 };
 
 // Calculate total compareAt price
@@ -127,6 +124,7 @@ const switchGummyType = (type: string) => {
 
     checkoutStore.selectedQuantity = variantId;
     checkoutStore.addGummyProduct();
+    trackAllEvent("AddToCart")
 };
 
 // Address auto complete
@@ -202,9 +200,7 @@ onMounted(async () => {
 
     // Facebook CAPI & GTM DataLayer - InitiateCheckout event
     setTimeout(() => {
-        fbCAPI("InitiateCheckout");
-        fbCAPIAPI("InitiateCheckout");
-        useOrderDataLayer("InitiateCheckout");
+        trackAllEvent("InitiateCheckout")
     }, 1000);
 
 })

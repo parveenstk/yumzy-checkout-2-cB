@@ -496,3 +496,12 @@ export const extractAddressComponents = async (addressComponents: AddressCompone
         ])
     }
 };
+
+// fire all the events in datalayer and CAPI
+export const trackAllEvent = (eventName: string): void => {
+    if (import.meta.server) return;
+
+    fbCAPI(eventName);
+    fbCAPIAPI(eventName);
+    useOrderDataLayer(eventName);
+};
