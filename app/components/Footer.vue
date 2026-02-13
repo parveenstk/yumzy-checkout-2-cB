@@ -22,7 +22,7 @@ onMounted(() => {
         <div class="mb-2">
             <template v-for="(item, index) in footerContent.links" :key="index">
 
-                <NuxtLink :to="lpParamValue" class="hover:text-gray-800 hover:underline cursor-pointer">
+                <NuxtLink :to="item.url" class="hover:text-gray-800 hover:underline cursor-pointer">
                     {{ item.label }}
                 </NuxtLink>
 

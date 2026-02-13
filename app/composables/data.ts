@@ -139,9 +139,9 @@ export const headerContent = {
 // Footer.vue content
 export const footerContent = {
     links: [
-        { label: "Terms & Conditions", url: "/" },
-        { label: "Privacy Policy / CCPA", url: "/" },
-        { label: "Returns", url: "/" },
+        { label: "Terms & Conditions", url: "https://get.yumzy.com/policy/terms-condition.html" },
+        { label: "Privacy Policy / CCPA", url: "https://get.yumzy.com/policy/privacy-policy.html" },
+        { label: "Returns", url: "https://get.yumzy.com/policy/returns.html" },
     ],
 
     disclaimer: `By filling out the field, you consent for Yumzy to use automated technology, including texts and prerecorded messages, to contact you at the number and email provided about Yumzy offers.`,
