@@ -1,3 +1,20 @@
+<script setup lang="ts">
+const lpParamValue = ref('/')
+
+onMounted(() => {
+    const param = getFromStorage('lpParam', 'session')
+
+    if (!param || param === 'default') {
+        lpParamValue.value = '/'
+    } else {
+        lpParamValue.value = `/${param}`
+    }
+
+    console.log('lpParam:', lpParamValue.value)
+})
+
+</script>
+
 <template>
     <footer class="w-full text-gray-500 text-center text-sm py-6 px-4">
 
@@ -5,17 +22,9 @@
         <div class="mb-2">
             <template v-for="(item, index) in footerContent.links" :key="index">
 
-                <!-- Internal Link -->
-                <NuxtLink v-if="item.url.startsWith('/')" :to="item.url"
-                    class="hover:text-gray-800 hover:underline cursor-pointer">
+                <NuxtLink :to="lpParamValue" class="hover:text-gray-800 hover:underline cursor-pointer">
                     {{ item.label }}
                 </NuxtLink>
-
-                <!-- External Link -->
-                <a v-else :href="item.url" target="_blank" rel="noopener noreferrer"
-                    class="hover:text-gray-800 hover:underline cursor-pointer">
-                    {{ item.label }}
-                </a>
 
                 <span v-if="index < footerContent.links.length - 1"> | </span>
             </template>
