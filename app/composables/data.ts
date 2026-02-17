@@ -97,15 +97,15 @@ export const tabs = [
     },
 ]
 
-// export const termsAndCondition = (price: string) => [
-//     `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
-//     "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
-// ]
+export const policyUrls = [
+    { label: "Privacy Policy", url: "https://get.yumzy.com/policy/privacy-policy.html" },
+    { label: "Terms of Use", url: "https://get.yumzy.com/policy/terms-of-use.html" },
+]
 
 export const getTermsHtml = (price: string) => ({
-    subscribe: `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the Terms of Use and Privacy Policy. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
+    subscribe: `By clicking “COMPLETE PURCHASE”, I’m making the important decision to take control of my families health. I understand to achieve the maximum health benefits for my family we need to take Yumzy gummies regularly for a minimum of 45 days. I confirm that I have read and agree to the <a href="${policyUrls[1]?.url}" target="_blank" class="font-bold hover:underline">Terms of Use</a> and <a href="${policyUrls[0]?.url}" target="_blank" class="font-bold hover:underline">Privacy Policy</a>. I acknowledge that my subscription will automatically renew at $${price} every 4 weeks until I cancel. Remember that we stand behind our iron clad 200% happiness money back guarantee so there is no risk to you.`,
     onetime:
-        "🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy's Privacy Policy and Terms of Use."
+        `🔒 By tapping COMPLETE PURCHASE below, you accept Yumzy’s <a href="${policyUrls[0]?.url}" target="_blank" class="font-bold hover:underline">Privacy Policy</a> and <a href="${policyUrls[1]?.url}" target="_blank" class="font-bold hover:underline">Terms of Use</a>.`
 })
 
 // Header.vue content
