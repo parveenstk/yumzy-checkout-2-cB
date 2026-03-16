@@ -10,7 +10,7 @@ onMounted(() => {
         lpParamValue.value = `/${param}`
     }
 
-    console.log('lpParam:', lpParamValue.value)
+    // console.log('lpParam:', lpParamValue.value)
 })
 
 </script>

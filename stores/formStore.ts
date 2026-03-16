@@ -300,7 +300,7 @@ export const useFormStore = defineStore('formStore', () => {
         // Check if payment method is selected
         if (!paymentMethod.value) {
             errors.paymentMethod = 'Please select a payment method';
-            console.log('No payment method selected');
+            // console.log('No payment method selected');
             return false;
         }
 
@@ -333,7 +333,7 @@ export const useFormStore = defineStore('formStore', () => {
         // Use the active schema based on payment method
         const schema = activeSchema.value;
         if (!schema) {
-            console.log('No schema available');
+            // console.log('No schema available');
             return false;
         };
 
@@ -475,7 +475,7 @@ export const useFormStore = defineStore('formStore', () => {
             formFields.billingState = '';
             return;
         }
-        console.log("handleCountry triggered for shipping")
+        // console.log("handleCountry triggered for shipping")
 
         formFields.shipCountry = value;
         checkoutStore.selectedStates = [...filteredStates];

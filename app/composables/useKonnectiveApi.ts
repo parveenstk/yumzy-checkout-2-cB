@@ -146,8 +146,8 @@ export const importClick = async () => {
     saveToStorage('sessionId', response.message.sessionId, 'local');
     saveToStorage('sessionId', response.message.sessionId, 'session');
 
-    console.log("sessionId-local:", getFromStorage('sessionId', 'local'));
-    console.log("sessionId-session:", getFromStorage('sessionId', 'session'));
+    // console.log("sessionId-local:", getFromStorage('sessionId', 'local'));
+    // console.log("sessionId-session:", getFromStorage('sessionId', 'session'));
 };
 
 // Fetch Import Lead
@@ -155,11 +155,11 @@ export const importLead = async () => {
     const formStore = useFormStore();
 
     // checkoutStore
-    console.log("importLead called");
+    // console.log("importLead called");
     const checkoutStore = useCheckoutStore();
 
     const payload = await params();
-    console.log("importLead → payload:", payload);
+    // console.log("importLead → payload:", payload);
     if (!payload) return;
 
     const response = await request('/importLead', payload);
@@ -171,7 +171,7 @@ export const importLead = async () => {
 
     saveToStorage("orderId", response.message.orderId, "local");
     checkoutStore.orderId = response.message.orderId;
-    console.log('orderId:', getFromStorage('orderId', 'local'));
+    // console.log('orderId:', getFromStorage('orderId', 'local'));
 };
 
 // Import Order
@@ -182,7 +182,7 @@ export const importOrder = async () => {
     const payload = await params('order');
     if (!payload) return;
     const response = await request('/importOrder', payload);
-    console.log('importOrder response:', response);
+    // console.log('importOrder response:', response);
 
     // saving response in variable
     if (response.result !== 'SUCCESS') {
@@ -217,7 +217,7 @@ export const importOrder = async () => {
 
     // Save to session storage
     saveToStorage('savedOrderDetails', savedOrderDetails, 'session');
-    console.log('savedOrder:', savedOrderDetails);
+    // console.log('savedOrder:', savedOrderDetails);
 
     if (response.message.paypalUrl) {
         window.location.href = response.message.paypalUrl;
@@ -252,7 +252,7 @@ export const importUpsell = async ({ productId, productQty, productPrice, varian
     if (+productPrice > 0) params.productPrice = productPrice;
 
     const response: any = await request('importUpsell', params)
-    console.log("response", response)
+    // console.log("response", response)
 
     const router = useRouter();
     if (response.result === 'SUCCESS') {

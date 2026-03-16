@@ -432,7 +432,7 @@ export function hashCode(str: string) {
 
 // It will extract address from API and will add in address fields in structure way 
 export const extractAddressComponents = async (addressComponents: AddressComponent[], type = 'ship') => {
-    console.log("addressComponents", addressComponents)
+    // console.log("addressComponents", addressComponents)
     const formStore = useFormStore();
     const handleError = formStore.handleError;
     let streetNumber = '';

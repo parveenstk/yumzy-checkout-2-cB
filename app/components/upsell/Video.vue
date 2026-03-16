@@ -23,7 +23,7 @@ export default {
         video.addEventListener('ended', this.onEnded);
 
         // small debug log so you can see clicks in console
-        console.log('Video mounted. src=', this.src);
+        // console.log('Video mounted. src=', this.src);
     },
     beforeUnmount() {
         const v = this.$refs.video;
@@ -38,7 +38,7 @@ export default {
         togglePlay() {
             const video = this.$refs.video;
             if (!video) return;
-            console.log('togglePlay called (video.paused =', video.paused, ')');
+            // console.log('togglePlay called (video.paused =', video.paused, ')');
 
             if (video.paused) {
                 // attempt to play (returns a promise on modern browsers)
