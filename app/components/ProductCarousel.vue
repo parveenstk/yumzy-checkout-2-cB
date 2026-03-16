@@ -5,7 +5,6 @@ const props = defineProps<{
 }>()
 
 const activeSlide = ref(0)
-const currentSlide = computed(() => props.slides[activeSlide.value])
 
 const next = () => {
     activeSlide.value = (activeSlide.value + 1) % props.slides.length
@@ -25,9 +24,12 @@ const goTo = (index: number) => {
     <div class="w-full max-w-4xl space-y-4">
 
         <!-- Main Image -->
-        <div class="relative overflow-hidden rounded-xl shadow-lg">
-            <NuxtImg :src="currentSlide" width="509" alt="Carousel Image"
-                class="w-full object-cover transition duration-500 md:max-h-[477px]" />
+        <div class="relative overflow-hidden rounded-xl shadow-lg md:max-h-[477px]">
+            <div class="flex transition-transform duration-700 ease-[cubic-bezier(.22,.61,.36,1)]"
+                :style="{ transform: `translateX(-${activeSlide * 100}%)` }">
+                <NuxtImg v-for="(slide, index) in slides" :key="index" :src="slide" width="1000" height="904"
+                    class="w-full flex-shrink-0 object-cover" alt="Carousel Image" />
+            </div>
 
             <!-- Prev -->
             <button @click="prev"
@@ -55,3 +57,14 @@ const goTo = (index: number) => {
 
     </div>
 </template>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.35s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
