@@ -17,7 +17,7 @@ const onChange = (e: Event) => {
 <template>
     <div>
         <select :value="modelValue" :name="name" @change="onChange" :class="[
-            'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+            'cursor-pointer w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
             error ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500'
         ]">
             <slot />

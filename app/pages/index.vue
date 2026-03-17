@@ -477,7 +477,7 @@ onMounted(async () => {
                                 <select v-model="formFields.shipCountry" name="shipCountry" @change="
                                     formStore.handleCountry(($event.target as HTMLInputElement).value, 'ship');
                                 formStore.validateField('shipCountry', ($event.target as HTMLInputElement).value);"
-                                    :class="['w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+                                    :class="['cursor-pointer w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
                                         errors.shipCountry ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
                                     <option value="">-- Choose Country --</option>
                                     <option v-for="country in checkoutStore.availableCountires"
@@ -494,7 +494,7 @@ onMounted(async () => {
                                         <select v-model="formFields.shipState" name="shipState"
                                             @input="validateField('shipState', ($event.target as HTMLInputElement).value)"
                                             :class="[
-                                                'w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+                                                'cursor-pointer w-full m-0 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
                                                 errors.shipState ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
                                             <option value="">-- Choose State --</option>
                                             <option v-for="state in checkoutStore.selectedStates" :key="state.stateCode"
@@ -618,7 +618,7 @@ onMounted(async () => {
                                     <select v-model="formFields.billingCounty" name="billingCounty"
                                         @input="formStore.handleCountry(($event.target as HTMLInputElement).value, 'bill')"
                                         :class="[
-                                            'w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+                                            'cursor-pointer w-full mb-0 mt-4 p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
                                             errors.billingCounty ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
                                         <option value="">-- Choose Country --</option>
                                         <option v-for="country in checkoutStore.availableCountires"
@@ -634,7 +634,7 @@ onMounted(async () => {
                                             <select v-model="formFields.billingState" name="billingState"
                                                 @input="validateField('billingState', ($event.target as HTMLInputElement).value)"
                                                 :class="[
-                                                    'w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
+                                                    'cursor-pointer w-full p-3 rounded-md h-[60px] bg-gray-100 focus:outline-none focus:ring-2',
                                                     errors.billingState ? 'border border-red-500 ring-[#e6193c]' : 'focus:ring-blue-500']">
                                                 <option value="">-- Choose State --</option>
                                                 <option v-for="state in checkoutStore.selectedStatesBill"
