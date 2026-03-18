@@ -79,7 +79,7 @@ const callImportUpsell = () => {
 
                     <div class="px-[10px] mb-5">
                         <select v-model="selectedVariantId"
-                            class="block w-full lg:max-w-[400px] mx-auto font-extrabold rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 text-lg shadow-sm focus:border-[#1EB9F0] focus:ring focus:ring-[#1EB9F0]/30 focus:outline-none transition">
+                            class="cursor-pointer block w-full lg:max-w-[400px] mx-auto font-extrabold rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 text-lg shadow-sm focus:border-[#1EB9F0] focus:ring focus:ring-[#1EB9F0]/30 focus:outline-none transition">
                             <option :value="config.upsell2VariantIds[0]">1 bag — $34</option>
                             <option :value="config.upsell2VariantIds[1]">2 bags — $31 Each</option>
                             <option :value="config.upsell2VariantIds[2]">3 bags — $29 Each</option>
