@@ -136,7 +136,11 @@ const isUpsellOpen = ref(false)
                                     leveled
                                     up its nutrition and wellness?
                                 </p>
-                                <p class="mt-3 text-[12px] font-bold">Copyright 2025 © support@Yumzy.com</p>
+                                <p class="mt-3 text-[12px] font-bold">Copyright 2025 ©
+                                    <a :href="headerContent.contact.mailto" class="text-black hover:underline">
+                                        {{ headerContent.contact.email }}
+                                    </a>
+                                </p>
                             </div>
                         </div>
                     </footer>

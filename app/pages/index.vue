@@ -428,7 +428,7 @@ onMounted(async () => {
                                         @input="validateField('email', $event)" />
 
                                     <!-- Phone Number -->
-                                    <div class="flex items-center justify-center gap-2 lg:gap-4 w-full mt-4 m-0">
+                                    <div class="flex items-start justify-center gap-2 lg:gap-4 w-full mt-4 m-0">
                                         <div
                                             class="flex justify-center items-center gap-1 bg-white shadow-md lg:px-4 px-3 rounded-md h-[58px]">
                                             <div class="h-5 w-10 lg:w-13 flex items-center justify-center">
