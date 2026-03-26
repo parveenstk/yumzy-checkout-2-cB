@@ -8,6 +8,9 @@ import { useCheckoutStore } from '~~/stores';
 // Meta tag details (for SEO/metadata)
 metaData("Upsell-2 | Yumzy", "Grab limited time offer.");
 
+// video loading state
+const isVideoLoading = ref(true)
+
 // checkout Store
 const checkoutStore = useCheckoutStore();
 checkoutStore.setPageType('upsellPage2');
@@ -15,7 +18,7 @@ const config = env();
 const router = useRouter();
 const checkPixel = router.options.history.state;
 
-onMounted(() => {
+onMounted(async () => {
 
     // check stetps affter successfull order
     checkSteps();
@@ -28,7 +31,12 @@ onMounted(() => {
     }
 
     // Import Click
-    importClick();
+    await importClick();
+
+    // skeleton loader will show for at least 0.5 seconds, even if video loads faster, to avoid flicker
+    setTimeout(() => {
+        isVideoLoading.value = false
+    }, 500) // 0.5 seconds
 })
 
 // Upsell/Downsell pop-up
@@ -73,7 +81,8 @@ const callImportUpsell = () => {
                     </h1>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent :thumbnailDesktop="upsellUrls.upsell2.thumbnailDesktop"
+                    <SkeletonVideoContent v-if="isVideoLoading" />
+                    <UpsellVideoContent v-else :thumbnailDesktop="upsellUrls.upsell2.thumbnailDesktop"
                         :desktopUrl="upsellUrls.upsell2.deskotp" :thumbnailMobile="upsellUrls.upsell2.thumbnailMobile"
                         :mobileUrl="upsellUrls.upsell2.mobile" />
 

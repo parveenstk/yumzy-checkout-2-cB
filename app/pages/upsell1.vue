@@ -5,12 +5,10 @@ import { useOrderDataLayer } from '~/composables/useGtm.client';
 import { useCheckoutStore } from '~~/stores';
 
 // meta tag details
-useHead({
-    title: "Upsell-1 | Yumzy",
-    meta: [
-        { name: 'description', content: "Grab limited time offer." },
-    ],
-})
+metaData("Upsell-1 | Yumzy", "Grab limited time offer.")
+
+// video loading state
+const isVideoLoading = ref(true)
 
 // checkout Store
 const checkoutStore = useCheckoutStore();
@@ -27,7 +25,7 @@ const productDetails: any = ref({
     event: "Upsell1cv"
 });
 
-onMounted(() => {
+onMounted(async () => {
 
     // check stetps affter successfull order
     checkSteps();
@@ -40,7 +38,12 @@ onMounted(() => {
     }
 
     // Import Click
-    importClick();
+    await importClick();
+
+    // skeleton loader will show for at least 0.5 seconds, even if video loads faster, to avoid flicker
+    setTimeout(() => {
+        isVideoLoading.value = false
+    }, 500) // 0.5 seconds
 })
 
 // Upsell / Downsell pop-Up
@@ -70,7 +73,8 @@ const isUpsellOpen = ref(false)
                         Guarantees your shipment <br> arrives in 2 days or less for only $9.99! </h2>
 
                     <!-- Video Content -->
-                    <UpsellVideoContent :thumbnailDesktop="upsellUrls.upsell1.thumbnailDesktop"
+                    <SkeletonVideoContent v-if="isVideoLoading" />
+                    <UpsellVideoContent v-else :thumbnailDesktop="upsellUrls.upsell1.thumbnailDesktop"
                         :desktopUrl="upsellUrls.upsell1.deskotp" :thumbnailMobile="upsellUrls.upsell1.thumbnailMobile"
                         :mobileUrl="upsellUrls.upsell1.mobile" />
 
